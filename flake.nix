@@ -1,43 +1,177 @@
-let wtVersion = "4.4.0";
-in {
+{
   description = "Domestic Supervisor";
   inputs = {
     nixpkgs.url = "nixpkgs";
     wt = {
-      url = "github:emweb/wt/${wtVersion}";
+      url = "github:emweb/wt/4.4.0";
       flake = false;
     };
-
+    dlib = {
+      url = "http://dlib.net/files/dlib-19.21.tar.bz2";
+      flake = false;
+    };
+    opencv = {
+      url = "https://github.com/opencv/opencv/archive/4.5.0.zip";
+      flake = false;
+    };
+    paho-mqtt-cpp = {
+      url = "https://github.com/eclipse/paho.mqtt.cpp/archive/v1.1.tar.gz";
+      flake = false;
+    };
+    paho-mqtt-c = {
+      url =
+        "https://github.com/eclipse/paho.mqtt.c/releases/download/v1.3.6/Eclipse-Paho-MQTT-C-1.3.6-Linux.tar.gz";
+      flake = false;
+    };
+    spdlog = {
+      url = "https://github.com/gabime/spdlog/archive/v1.8.1.tar.gz";
+      flake = false;
+    };
   };
   outputs = { self, nixpkgs, ... }@inputs:
     let
-      pkgs = import nixpkgs { system = "x86_64-linux"; };
+      pkgs = import nixpkgs {
+        system = "x86_64-linux";
+        config.allowUnfree = true;
+      };
+      stdenvClang = with pkgs; overrideCC stdenv llvmPackages_11.libcxxClang;
 
-      wt = pkgs.stdenv.mkDerivation {
+      boostClang =
+        (pkgs.boost174.override { stdenv = stdenvClang; }).overrideAttrs (old: {
+          LDFLAGS = "-fuse-ld=lld";
+          AR = "llvm-ar";
+          RANLIB = "llvm-ranlib";
+          nativeBuildInputs = old.nativeBuildInputs
+            ++ [ pkgs.llvmPackages_11.bintools ];
+        });
+      wt = stdenvClang.mkDerivation {
         name = "wt";
-        version = wtVersion;
 
         enableParalellBuilding = true;
 
         src = inputs.wt;
 
-        buildInputs = with pkgs; [ cmake boost pango graphicsmagick ];
+        nativeBuildInputs = with pkgs; [ cmake llvmPackages_11.bintools ];
+        buildInputs = with pkgs; [ boostClang pango graphicsmagick libGLU ];
         cmakeFlags = [
           "--no-warn-unused-cli"
           "-DWT_CPP14_MODE=-std=c++14"
           "-DWT_WRASTERIMAGE_IMPLEMENTATION=GraphicsMagick"
+          "-DGM_PREFIX=${pkgs.graphicsmagick}"
+          "-DCMAKE_EXE_LINKER_FLAGS=-fuse-ld=lld"
         ];
+
+        AR = "llvm-ar";
+        RANLIB = "llvm-ranlib";
       };
-      domestic-supervisor = pkgs.stdenv.mkDerivation {
+      dlib = stdenvClang.mkDerivation {
+        name = "dlib";
+
+        enableParallelBuilding = true;
+
+        src = inputs.dlib;
+
+        nativeBuildInputs = with pkgs; [ cmake pkgs.llvmPackages_11.bintools ];
+        buildInputs = with pkgs; [ cudaPackages.cudatoolkit_11 ];
+        cmakeFlags = [
+          "--no-warn-unused-cli"
+          "-DUSE_AVX_INSTRUCTIONS=1"
+          "-DCMAKE_EXE_LINKER_FLAGS=-fuse-ld=lld"
+        ];
+
+        AR = "llvm-ar";
+        RANLIB = "llvm-ranlib";
+      };
+      opencv = stdenvClang.mkDerivation {
+        name = "opencv";
+
+        enableParallelBuilding = true;
+
+        src = inputs.opencv;
+
+        nativeBuildInputs = with pkgs; [ cmake pkgs.llvmPackages_11.bintools ];
+        buildInputs = with pkgs; [
+          ffmpeg_4
+          gst_all_1.gstreamer
+          gst_all_1.gst-plugins-good
+        ];
+        cmakeFlags = [
+          "--no-warn-unused-cli"
+          "-DCPU_BASELINE=AVX"
+          "-DCMAKE_EXE_LINKER_FLAGS=-fuse-ld=lld"
+        ];
+
+        AR = "llvm-ar";
+        RANLIB = "llvm-ranlib";
+      };
+      paho-mqtt-c = stdenvClang.mkDerivation {
+        name = "paho-mqtt-c";
+
+        src = inputs.paho-mqtt-c;
+
+        dontBuild = true;
+
+        installPhase = "cp -r . $out";
+      };
+      paho-mqtt-cpp = stdenvClang.mkDerivation {
+        name = "paho-mqtt-cpp";
+
+        src = inputs.paho-mqtt-cpp;
+
+        nativeBuildInputs = with pkgs; [ cmake pkgs.llvmPackages_11.bintools ];
+        buildInputs = [ paho-mqtt-c ];
+        cmakeFlags = [
+          "--no-warn-unused-cli"
+          "-DPAHO_WITH_SSL=0"
+          "-DCMAKE_EXE_LINKER_FLAGS=-fuse-ld=lld"
+        ];
+
+        AR = "llvm-ar";
+        RANLIB = "llvm-ranlib";
+      };
+      spdlog = stdenvClang.mkDerivation {
+        name = "spdlog";
+
+        src = inputs.spdlog;
+
+        nativeBuildInputs = with pkgs; [ cmake pkgs.llvmPackages_11.bintools ];
+        cmakeFlags =
+          [ "--no-warn-unused-cli" "-DCMAKE_EXE_LINKER_FLAGS=-fuse-ld=lld" ];
+
+        AR = "llvm-ar";
+        RANLIB = "llvm-ranlib";
+      };
+      domestic-supervisor = stdenvClang.mkDerivation {
         name = "domestic-supervisor";
 
         src = self;
 
-        buildInputs = with pkgs; [ cmake wt ];
-        cmakeFlags = [ "--no-warn-unused-cli" ];
+        nativeBuildInputs = [
+          pkgs.cmake
+          pkgs.ninja
+          pkgs.llvmPackages_11.libcxx
+          pkgs.llvmPackages_11.libcxxabi
+          pkgs.llvmPackages_11.bintools
+        ];
+        buildInputs =
+          [ boostClang wt dlib opencv paho-mqtt-cpp paho-mqtt-c spdlog ];
+        cmakeFlags = [
+          "--no-warn-unused-cli"
+          "-DCMAKE_EXPORT_COMPILE_COMMANDS=1"
+          "-DCMAKE_EXE_LINKER_FLAGS=-fuse-ld=lld"
+        ];
 
+        AR = "llvm-ar";
+        RANLIB = "llvm-ranlib";
         CPLUS_INCLUDE_PATH =
-          "${pkgs.llvmPackages_11.libcxx}/include/c++/v1:${pkgs.clang_11.libc_dev}/include";
+          "${pkgs.llvmPackages_11.libcxx}/include/c++/v1:${pkgs.clang_11.libc_dev}/include:${pkgs.clang_11.cc}/lib/clang/${pkgs.clang_11.version}/include";
       };
-    in { defaultPackage.x86_64-linux = domestic-supervisor; };
+    in {
+      devShell.x86-64-linux = domestic-supervisor;
+      defaultPackage.x86_64-linux = domestic-supervisor;
+      packages.x86_64-linux = {
+        inherit opencv dlib wt domestic-supervisor paho-mqtt-c paho-mqtt-cpp
+          spdlog;
+      };
+    };
 }

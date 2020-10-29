@@ -1,0 +1,4 @@
+If:
+    PathExclude: .*/domestic-supervisor/.*
+CompileFlags:
+    Add: -std=c++20

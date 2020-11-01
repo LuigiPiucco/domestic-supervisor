@@ -141,37 +141,43 @@
         AR = "llvm-ar";
         RANLIB = "llvm-ranlib";
       };
-      domestic-supervisor = stdenvClang.mkDerivation {
-        name = "domestic-supervisor";
+      domestic-supervisor = isShell:
+        stdenvClang.mkDerivation rec {
+          name = "domestic-supervisor";
 
-        src = self;
+          src = self;
 
-        nativeBuildInputs = [
-          pkgs.cmake
-          pkgs.ninja
-          pkgs.llvmPackages_11.libcxx
-          pkgs.llvmPackages_11.libcxxabi
-          pkgs.llvmPackages_11.bintools
-        ];
-        buildInputs =
-          [ boostClang wt dlib opencv paho-mqtt-cpp paho-mqtt-c spdlog ];
-        cmakeFlags = [
-          "--no-warn-unused-cli"
-          "-DCMAKE_EXPORT_COMPILE_COMMANDS=1"
-          "-DCMAKE_EXE_LINKER_FLAGS=-fuse-ld=lld"
-        ];
+          nativeBuildInputs = [
+            pkgs.cmake
+            pkgs.ninja
+            pkgs.llvmPackages_11.libcxx
+            pkgs.llvmPackages_11.libcxxabi
+            pkgs.llvmPackages_11.bintools
+          ] ++ pkgs.lib.optional (!isShell) pkgs.autoPatchelfHook;
+          buildInputs =
+            [ boostClang wt dlib opencv paho-mqtt-cpp paho-mqtt-c spdlog ];
+          cmakeFlags = [
+            "--no-warn-unused-cli"
+            "-DCMAKE_EXPORT_COMPILE_COMMANDS=1"
+            "-DCMAKE_EXE_LINKER_FLAGS=-fuse-ld=lld"
+          ];
 
-        AR = "llvm-ar";
-        RANLIB = "llvm-ranlib";
-        CPLUS_INCLUDE_PATH =
-          "${pkgs.llvmPackages_11.libcxx}/include/c++/v1:${pkgs.clang_11.libc_dev}/include:${pkgs.clang_11.cc}/lib/clang/${pkgs.clang_11.version}/include";
-      };
+          AR = "llvm-ar";
+          RANLIB = "llvm-ranlib";
+          LD_LIBRARY_PATH = if isShell then
+            pkgs.lib.makeLibraryPath (buildInputs
+              ++ [ pkgs.llvmPackages_11.libcxx pkgs.llvmPackages_11.libcxxabi ])
+          else
+            null;
+          CPLUS_INCLUDE_PATH =
+            "${pkgs.llvmPackages_11.libcxx}/include/c++/v1:${pkgs.clang_11.libc_dev}/include:${pkgs.clang_11.cc}/lib/clang/${pkgs.clang_11.version}/include";
+        };
     in {
-      devShell.x86-64-linux = domestic-supervisor;
-      defaultPackage.x86_64-linux = domestic-supervisor;
+      devShell.x86-64-linux = domestic-supervisor true;
+      defaultPackage.x86_64-linux = domestic-supervisor true;
       packages.x86_64-linux = {
-        inherit opencv dlib wt domestic-supervisor paho-mqtt-c paho-mqtt-cpp
-          spdlog;
+        domestic-supervisor = domestic-supervisor false;
+        inherit opencv dlib wt paho-mqtt-c paho-mqtt-cpp spdlog;
       };
     };
 }

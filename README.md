@@ -82,22 +82,22 @@ good code practices.
     - Manages the residence's state, keeping tabs of which lights and locks are
       on;
     - Registers callbacks to do things when the lights and/or locks change;
-  - `view` interface that inherits from `Wt::WWidget`:
-    - Represents a view of the application;
-    - Has a name and a path plus the elements of `Wt::WWidget`;
-  - Entities that inherit from `view` in the `views` namespace:
-    - 2 `blueprint`:
-      - The blueprint views's root widget;
-      - Shown when the user navigates to "/blueprint";
-  - Entities that inherit from `Wt::WWidget` in the `widgets` namespace:
-    - 2 `camera_panel`:
-      - Draws the camera control panel according to the detection state and
-        updates the count when it changes;
-    - 2 `labeled_number`:
-      - Draws a circumference with a number overlaid and a right-side label by
-        receiving the arguments
-        - Initial number;
-        - Label to be written;
+- `view` interface that inherits from `Wt::WWidget`:
+  - Represents a view of the application;
+  - Has a name and a path plus the elements of `Wt::WWidget`;
+- Entities that inherit from `view` in the `views` namespace:
+  - 2 `blueprint`:
+    - The blueprint views's root widget;
+    - Shown when the user navigates to "/blueprint";
+- Entities that inherit from `Wt::WWidget` in the `widgets` namespace:
+  - 2 `camera_panel`:
+    - Draws the camera control panel according to the detection state and
+      updates the count when it changes;
+  - 2 `labeled_number`:
+    - Draws a circumference with a number overlaid and a right-side label by
+      receiving the arguments
+      - Initial number;
+      - Label to be written;
 
 ### Supervisor entities
 
@@ -119,18 +119,18 @@ good code practices.
     - May be disabled/enabled, to mitigate resource usage when the camera view
       is not shown or the user does not want facial detection;
     - Registers callbacks to do things when the number of detections changes;
-  - Entities that inherit from `view` in the `views` namespace:
-    - 1 `camera`:
-      - The camera view's root widget;
-      - Shown when the user navigates to the path "/camera" or "/";
-    - 1 `not_connected`:
-    - Prints an error message to the screen when the simulation system is not
-      connected;
-  - Entities that inherit from `Wt::WWidget` in the `widgets` namespace:
-    - 2 `page_anchor`:
-      - Draws the page switch button by receiving the arguments
-        - Top left corner position;
-        - Entity that implements `view` to be shown when clicked;
+- Entities that inherit from `view` in the `views` namespace:
+  - 1 `camera`:
+    - The camera view's root widget;
+    - Shown when the user navigates to the path "/camera" or "/";
+  - 1 `not_connected`:
+  - Prints an error message to the screen when the simulation system is not
+    connected;
+- Entities that inherit from `Wt::WWidget` in the `widgets` namespace:
+  - 2 `page_anchor`:
+    - Draws the page switch button by receiving the arguments
+      - Top left corner position;
+      - Entity that implements `view` to be shown when clicked;
 - 1 `domestic_supervisor` that inherits from `Wt::WApplication`:
   - Represents the application as a whole;
   - Defines the server's life-cycle methods (startup, connect, run,
@@ -155,7 +155,7 @@ good code practices.
   - Defines the server's life-cycle methods (startup, connect, run,
     shutdown...);
 
-## Acknowledgements
+## Acknowledgments
 
 Light bulb icons made by
 [Good Ware](https://www.flaticon.com/authors/good-ware "Good Ware") from

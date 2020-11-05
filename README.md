@@ -1,5 +1,7 @@
 # domestic-supervisor
 
+[![GitHub license](https://img.shields.io/github/license/LuigiPiucco/domestic-supervisor?color=informational)][2] [![built with nix](https://builtwithnix.org/badge.svg)][1]
+
 A toy smart home simulator project.
 
 <a href="./README.pt.md">
@@ -8,6 +10,21 @@ A toy smart home simulator project.
 <a href="./README.ja.md">
 <img src="https://upload.wikimedia.org/wikipedia/en/thumb/9/9e/Flag_of_Japan.svg/1920px-Flag_of_Japan.svg.png" alt="日本語" title="日本語で読みます" width="32px" />
 </a>
+
+<!-- markdown-toc start - Don't edit this section. Run M-x markdown-toc-refresh-toc -->
+
+**Table of Contents**
+
+- [domestic-supervisor](#domestic-supervisor)
+  - [Project](#project)
+  - [Interface design](#interface-design)
+  - [Implementation](#implementation)
+    - [Common entities](#common-entities)
+    - [Supervisor entities](#supervisor-entities)
+    - [Simulator entities](#simulator-entities)
+  - [Acknowledgements](#acknowledgements)
+
+<!-- markdown-toc end -->
 
 ## Project
 
@@ -151,3 +168,6 @@ via Wikimedia Commons
 Note about CC BY-SA: As I understand it, since the icons under CC are only
 collected, not modified in any way, I'm allowed to license my own work under a
 different license.
+
+[1]: https://builtwithnix.org "Built with nix"
+[2]: https://github.com/LuigiPiucco/domestic-supervisor/blob/master/LICENSE "Github license"

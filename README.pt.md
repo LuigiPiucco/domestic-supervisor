@@ -1,5 +1,7 @@
 # domestic-supervisor
 
+[![GitHub license](https://img.shields.io/github/license/LuigiPiucco/domestic-supervisor?color=informational)][2] [![Built with nix](https://builtwithnix.org/badge.svg)][1]
+
 Um projeto de brinquedo de simulação de casa automática.
 
 <a href="./README.md">
@@ -8,6 +10,21 @@ Um projeto de brinquedo de simulação de casa automática.
 <a href="./README.ja.md">
 <img src="https://upload.wikimedia.org/wikipedia/en/thumb/9/9e/Flag_of_Japan.svg/1920px-Flag_of_Japan.svg.png" alt="日本語" title="日本語で読みます" width="32px" />
 </a>
+
+<!-- markdown-toc start - Don't edit this section. Run M-x markdown-toc-refresh-toc -->
+
+**Table of Contents**
+
+- [domestic-supervisor](#domestic-supervisor)
+  - [Projeto](#projeto)
+  - [Design da interface](#design-da-interface)
+  - [Implementação](#implementação)
+    - [Entidades comuns](#entidades-comuns)
+    - [Entidades do supervisório](#entidades-do-supervisório)
+    - [Entidades do simulador](#entidades-do-simulador)
+  - [Reconhecimentos](#reconhecimentos)
+
+<!-- markdown-toc end -->
 
 ## Projeto
 
@@ -155,3 +172,6 @@ via Wikimedia Commons
 Nota sobre CC BY-SA: Pelo que eu entendi, como os ícones regidos pela licença CC
 são apenas coletados, e não modificados de alguma forma, tenho permissão para
 licenciar minhas obra sob uma licença diferente.
+
+[1]: https://builtwithnix.org "Construído com nix"
+[2]: https://github.com/LuigiPiucco/domestic-supervisor/blob/master/LICENSE "Licença do Github"

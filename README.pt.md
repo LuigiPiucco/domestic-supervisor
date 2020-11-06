@@ -76,12 +76,23 @@ código de C++ moderno.
 
 ### Entidades comuns
 
+- Namespace `utils`:
+  - Múltiplos `event`:
+    - Mantém armazenados funções para serem chamadas após ser disparado;
+    - Pode ser chamado como função para disparar;
+    - Projetado para ser possuído por outro objeto que possui eventos como
+      conceito e exposto por referência para que callbacks possam ser
+      registrados;
 - Namespace `controllers`:
   - 2 `state`:
     - Gerencia o estado da residência, mantendo informações sobre quais lampadas
       e travas estão ligadas;
     - Registra callbacks para realizar ações quando o estado das lampadas e/ou
       travas mudar;
+- Múltiplos `device`:
+  - Representa um único dispositivo, capaz de ser ativado e desativado;
+  - Empacota essa informação de estado com constantes local, tipo (luz ou trava)
+    descrição e nome;
 - Interface `view` que herda de `Wt::WWidget`:
   - Representa uma tela de visualização da aplicação;
   - Possui um nome e um caminho além dos elementos de `Wt::WWidget`;

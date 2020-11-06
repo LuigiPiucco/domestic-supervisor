@@ -77,11 +77,21 @@ good code practices.
 
 ### Common entities
 
+- `utils` namespace:
+  - Multiple `event`:
+    - Keeps track of functions to be called upon being triggered;
+    - May be called as a function to trigger;
+    - Intended to be owned by some other object that has events as a concept
+      and exposed by reference so callbacks may be registered;
 - `controllers` namespace:
   - 2 `state`:
     - Manages the residence's state, keeping tabs of which lights and locks are
       on;
     - Registers callbacks to do things when the lights and/or locks change;
+- Multiple `device`:
+  - Represents a single device, capable of being toggle on or off;
+  - Pairs this state information with constant location, type (light or lock),
+    description and name information;
 - `view` interface that inherits from `Wt::WWidget`:
   - Represents a view of the application;
   - Has a name and a path plus the elements of `Wt::WWidget`;

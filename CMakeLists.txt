@@ -15,13 +15,16 @@ find_package(wt CONFIG REQUIRED)
 find_package(PahoMqttCpp CONFIG REQUIRED)
 find_package(spdlog CONFIG REQUIRED)
 
-add_executable(domestic-supervisor src/supervisor/main.cpp)
+set(common_srcs src/common/device.cpp src/common/state.cpp)
+
+add_executable(domestic-supervisor src/supervisor/main.cpp ${common_srcs})
 set_target_properties(
   domestic-supervisor PROPERTIES CXX_EXTENSIONS OFF CXX_STANDARD 20
                                  CXX_STANDARD_REQUIRED ON)
 target_include_directories(
   domestic-supervisor
-  PRIVATE $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/include/supervisor>)
+  PRIVATE $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/include/supervisor>
+          $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/include/common>)
 target_link_libraries(
   domestic-supervisor
   PRIVATE Wt::Wt
@@ -34,13 +37,14 @@ target_link_libraries(
 target_compile_options(domestic-supervisor PRIVATE -nostdinc)
 target_link_options(domestic-supervisor PRIVATE -stdlib=libc++ -fuse-ld=lld)
 
-add_executable(domestic-simulator src/simulator/main.cpp)
+add_executable(domestic-simulator src/simulator/main.cpp ${common_srcs})
 set_target_properties(
   domestic-simulator PROPERTIES CXX_EXTENSIONS OFF CXX_STANDARD 20
                                 CXX_STANDARD_REQUIRED ON)
 target_include_directories(
   domestic-simulator
-  PRIVATE $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/include/simulator>)
+  PRIVATE $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/include/simulator>
+          $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/include/common>)
 target_link_libraries(
   domestic-simulator
   PRIVATE Wt::Wt

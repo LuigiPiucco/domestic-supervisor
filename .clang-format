@@ -1,17 +1,16 @@
 ﻿---
-BreakBeforeBraces: Stroustrup
-Cpp11BracedListStyle: 'true'
-IndentWidth: '4'
 Language: Cpp
+BreakBeforeBraces: Stroustrup
+Cpp11BracedListStyle: true
 NamespaceIndentation: All
 PointerAlignment: Right
-ReflowComments: 'true'
-SortIncludes: 'true'
-SpaceBeforeCtorInitializerColon: 'true'
-SpaceBeforeInheritanceColon: 'true'
-SpaceBeforeRangeBasedForLoopColon: 'true'
-Standard: Cpp11
-TabWidth: '4'
+ReflowComments: true
+SortIncludes: true
+SpaceBeforeCtorInitializerColon: true
+SpaceBeforeInheritanceColon: true
+SpaceBeforeRangeBasedForLoopColon: true
+Standard: c++20
+AccessModifierOffset: -4
 UseTab: Never
-
+IndentWidth: 4
 ...

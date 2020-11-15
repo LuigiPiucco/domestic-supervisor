@@ -1,9 +1,13 @@
 #pragma once
 
+#include "constants.hpp"
 #include "device.hpp"
 #include "event.hpp"
 #include <initializer_list>
+#include <iterator>
+#include <mutex>
 #include <string>
+#include <utility>
 #include <vector>
 
 namespace controllers {
@@ -12,7 +16,6 @@ namespace controllers {
     public:
         using device_list = std::vector<device>;
 
-        state() = delete;
         /// List initialization constructor.
         ///
         /// Example:
@@ -26,7 +29,7 @@ namespace controllers {
         ///     controllers::state s2{d1, d2} // or
         ///     auto s3 = controllers::state{d1, d2};
         /// \verbatim
-        state(std::initializer_list<device> l);
+        state(std::initializer_list<device> l) noexcept;
 
         /// Append all elements in a initializer list.
         void append_devices(std::initializer_list<device> l);
@@ -45,10 +48,12 @@ namespace controllers {
         void toggle(std::size_t i);
 
         /// Get the `event` for the change action.
-        [[nodiscard]] auto changed() noexcept -> utils::event<device> &;
+        [[nodiscard]] auto changed() noexcept
+            -> utils::event<std::pair<std::size_t, bool>> &;
 
     private:
+        mutable std::mutex device_mutex;
         device_list _devices;
-        utils::event<device> _changed;
+        utils::event<std::pair<std::size_t, bool>> _changed;
     };
 } // namespace controllers

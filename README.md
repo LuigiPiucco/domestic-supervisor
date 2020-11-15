@@ -11,8 +11,6 @@ A toy smart home simulator project.
 <img src="https://upload.wikimedia.org/wikipedia/en/thumb/9/9e/Flag_of_Japan.svg/1920px-Flag_of_Japan.svg.png" alt="日本語" title="日本語で読みます" width="32px" />
 </a>
 
-<!-- markdown-toc start - Don't edit this section. Run M-x markdown-toc-refresh-toc -->
-
 **Table of Contents**
 
 - [domestic-supervisor](#domestic-supervisor)
@@ -23,8 +21,6 @@ A toy smart home simulator project.
     - [Supervisor entities](#supervisor-entities)
     - [Simulator entities](#simulator-entities)
   - [Acknowledgements](#acknowledgements)
-
-<!-- markdown-toc end -->
 
 ## Project
 
@@ -72,7 +68,7 @@ Blue print view:
 
 ## Implementation
 
-The project's implementation will be done in C++, in accordance to modern C++
+The project's implementation was done in C++, in accordance to modern C++
 good code practices.
 
 ### Common entities
@@ -88,36 +84,24 @@ good code practices.
     - Manages the residence's state, keeping tabs of which lights and locks are
       on;
     - Registers callbacks to do things when the lights and/or locks change;
+  - 2 `mqtt` that inherits from `mqtt::callback` and `mqtt::iaction_listener`:
+    - Responsible for processing incoming messages and providing an API to send
+      messages to the other aplication;
 - Multiple `device`:
   - Represents a single device, capable of being toggle on or off;
   - Pairs this state information with constant location, type (light or lock),
     description and name information;
-- `view` interface that inherits from `Wt::WWidget`:
+- `view` interface that inherits from `Wt::WContainerWidget`:
   - Represents a view of the application;
-  - Has a name and a path plus the elements of `Wt::WWidget`;
+  - Has a name and a path plus the elements of `Wt::WContainerWidget`;
 - Entities that inherit from `view` in the `views` namespace:
   - 2 `blueprint`:
     - The blueprint views's root widget;
     - Shown when the user navigates to "/blueprint";
-- Entities that inherit from `Wt::WWidget` in the `widgets` namespace:
-  - 2 `camera_panel`:
-    - Draws the camera control panel according to the detection state and
-      updates the count when it changes;
-  - 2 `labeled_number`:
-    - Draws a circumference with a number overlaid and a right-side label by
-      receiving the arguments
-      - Initial number;
-      - Label to be written;
 
 ### Supervisor entities
 
 - `controllers` namespace:
-  - 1 `mqtt` that inherits from `mqtt::callback` and `mqtt::iaction_listener`:
-    - Responsible for processing incoming messages and providing an API to send
-      messages to the simulator's devices;
-    - Provides methods to send light and/or lock state change request messages;
-    - Registers callbacks to do things when light and/or lock state change
-      notifications arrive;
   - 1 `deepnet`:
     - Responsible for applying the face detection algorithm on received images
       and marking the detections;
@@ -133,36 +117,36 @@ good code practices.
   - 1 `camera`:
     - The camera view's root widget;
     - Shown when the user navigates to the path "/camera" or "/";
-  - 1 `not_connected`:
-  - Prints an error message to the screen when the simulation system is not
-    connected;
-- Entities that inherit from `Wt::WWidget` in the `widgets` namespace:
+- Entities that inherit from a descendant of `Wt::WWidget` in the `widgets` 
+  namespace:
+  - 1 `camera_panel`:
+    - Draws the camera control panel according to the detection state and
+      updates the count when it changes;
   - 2 `page_anchor`:
     - Draws the page switch button by receiving the arguments
-      - Top left corner position;
       - Entity that implements `view` to be shown when clicked;
+- 1 `dynamic_image` that inherits from `Wt::WResource`:
+  - Provides a way to send a dynamic image to the user, for showing the camera;
 - 1 `domestic_supervisor` that inherits from `Wt::WApplication`:
   - Represents the application as a whole;
-  - Defines the server's life-cycle methods (startup, connect, run,
+  - Defines the applications's life-cycle methods (startup, connect, run,
     shutdown...);
+- 1 `domestic_server` that inherits from `Wt::WServer`:
+  - Configures the server to send the application under multiple URLs;
+  - Creates `domestic_supervisor` sessions on demand, so, in practice, there are
+    many of every entity, but for simplicity, only the number is a single
+    session is counted in this listing;
 
 ### Simulator entities
 
 - `controllers` namespace:
-  - 1 `mqtt` that inherits from `mqtt::callback` and `mqtt::iaction_listener`:
-    - Responsible for processing incoming messages and providing an API to send
-      messages to the supervisor;
-    - Provides methods to send light and/or lock state change request
-      notifications;
-    - Registers callbacks to do things when light and/or lock state change
-      requests arrive;
   - 1 `image_loop`:
     - Collects and sends webcam images through MQTT;
     - Runs in loop on separate, self managed thread;
     - Can be called as a function;
 - 1 `domestic_simulator` that inherits from `Wt::WApplication`:
   - Represents the application as a whole;
-  - Defines the server's life-cycle methods (startup, connect, run,
+  - Defines the application's life-cycle methods (startup, connect, run,
     shutdown...);
 
 ## Acknowledgments

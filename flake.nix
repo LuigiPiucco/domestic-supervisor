@@ -35,6 +35,8 @@
         config.allowUnfree = true;
       };
       stdenvClang = with pkgs; overrideCC stdenv llvmPackages_11.libcxxClang;
+      clang-tools = with pkgs;
+        pkgs.clang-tools.override { llvmPackages = llvmPackages_11; };
 
       boostClang =
         (pkgs.boost174.override { stdenv = stdenvClang; }).overrideAttrs (old: {
@@ -77,6 +79,7 @@
           "--no-warn-unused-cli"
           "-DUSE_AVX_INSTRUCTIONS=1"
           "-DCMAKE_EXE_LINKER_FLAGS=-fuse-ld=lld"
+          "-DDLIBUSECUDA=1"
         ];
 
         AR = "llvm-ar";
@@ -153,14 +156,12 @@
             pkgs.llvmPackages_11.libcxx
             pkgs.llvmPackages_11.libcxxabi
             pkgs.llvmPackages_11.bintools
-          ] ++ pkgs.lib.optional (!isShell) pkgs.autoPatchelfHook;
+          ] ++ pkgs.lib.optional (!isShell) pkgs.autoPatchelfHook
+            ++ pkgs.lib.optionals isShell [ clang-tools pkgs.lldb_11 ];
           buildInputs =
-            [ boostClang wt dlib opencv paho-mqtt-cpp paho-mqtt-c spdlog ];
-          cmakeFlags = [
-            "--no-warn-unused-cli"
-            "-DCMAKE_EXPORT_COMPILE_COMMANDS=1"
-            "-DCMAKE_EXE_LINKER_FLAGS=-fuse-ld=lld"
-          ];
+            [ boostClang wt dlib opencv paho-mqtt-cpp paho-mqtt-c spdlog pkgs.zlib ];
+          cmakeFlags =
+            [ "--no-warn-unused-cli" "-DCMAKE_EXE_LINKER_FLAGS=-fuse-ld=lld" ];
 
           AR = "llvm-ar";
           RANLIB = "llvm-ranlib";
@@ -171,6 +172,8 @@
             null;
           CPLUS_INCLUDE_PATH =
             "${pkgs.llvmPackages_11.libcxx}/include/c++/v1:${pkgs.clang_11.libc_dev}/include:${pkgs.clang_11.cc}/lib/clang/${pkgs.clang_11.version}/include";
+          ZLIB_LIBRARY = "${pkgs.zlib}/lib";
+          ZLIB_INCLUDE_DIR = "${pkgs.zlib}/include";
         };
     in {
       devShell.x86-64-linux = domestic-supervisor true;

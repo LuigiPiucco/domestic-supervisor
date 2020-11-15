@@ -11,8 +11,6 @@ Um projeto de brinquedo de simulação de casa automática.
 <img src="https://upload.wikimedia.org/wikipedia/en/thumb/9/9e/Flag_of_Japan.svg/1920px-Flag_of_Japan.svg.png" alt="日本語" title="日本語で読みます" width="32px" />
 </a>
 
-<!-- markdown-toc start - Don't edit this section. Run M-x markdown-toc-refresh-toc -->
-
 **Table of Contents**
 
 - [domestic-supervisor](#domestic-supervisor)
@@ -23,8 +21,6 @@ Um projeto de brinquedo de simulação de casa automática.
     - [Entidades do supervisório](#entidades-do-supervisório)
     - [Entidades do simulador](#entidades-do-simulador)
   - [Reconhecimentos](#reconhecimentos)
-
-<!-- markdown-toc end -->
 
 ## Projeto
 
@@ -71,7 +67,7 @@ Tela da planta baixa:
 
 ## Implementação
 
-A implementação do projeto será feita em C++, de acordo com as práticas de bom
+A implementação do projeto foi feita em C++, de acordo com as práticas de bom
 código de C++ moderno.
 
 ### Entidades comuns
@@ -89,37 +85,25 @@ código de C++ moderno.
       e travas estão ligadas;
     - Registra callbacks para realizar ações quando o estado das lampadas e/ou
       travas mudar;
+  - 1 `mqtt` que herda de `mqtt::callback` e `mqtt::iaction_listener`:
+    - É responsável por processar mensagens de entrada e fornecer
+      uma API para enviar mensagens à outra aplicação;
 - Múltiplos `device`:
   - Representa um único dispositivo, capaz de ser ativado e desativado;
-  - Empacota essa informação de estado com constantes local, tipo (luz ou trava)
-    descrição e nome;
-- Interface `view` que herda de `Wt::WWidget`:
+  - Empacota essa informação de estado com constantes tipo (luz ou trava) e
+    nome;
+- Interface `view` que herda de `Wt::WContainerWidget`:
   - Representa uma tela de visualização da aplicação;
-  - Possui um nome e um caminho além dos elementos de `Wt::WWidget`;
+  - Possui um nome e um caminho além dos elementos de `Wt::WContainerWidget`;
 - Entidades que herdam de `view` no namespace `views`;
   - 1 `blueprint`
     - É o widget raiz da tela da planta baixa;
     - É mostrado quando o usuário navega para o caminho "/blueprint";
-- Entidades que herdam de `Wt::WWidget` no namespace `widgets`:
-  - 2 `camera_panel`:
-    - Desenha o painel de controle da câmera de acordo com o estado das
-      detecções e atualiza a contagem quando esta muda;
-  - 2 `labeled_number`:
-    - Desenha uma circunferência com um número sobreposto e um rótulo à direita
-      recebendo os argumentos
-      - Número inicial;
-      - Rótulo a ser escrito;
+  
 
 ### Entidades do supervisório
 
 - Namespace `controllers`:
-  - 1 `mqtt` que herda de `mqtt::callback` e `mqtt::iaction_listener`:
-    - É responsável por processar mensagens de entrada e fornecer
-      uma API para enviar mensagens aos dispositivos do simulador;
-    - Fornece métodos para enviar mensagens de requisição de mudança de estado
-      de lâmpadas e/ou travas;
-    - Registra callbacks para realizar ações quando notificações de mudança
-      estado de lampadas e/ou travas forem recebidas;
   - 1 `deepnet`:
     - É responsável por aplicar o algoritmo de detecção facial nas imagens
       recebidas e demarcar a posição do rosto na imagem;
@@ -138,36 +122,34 @@ código de C++ moderno.
   - 1 `camera`:
     - É o widget raiz da tela da câmera;
     - É mostrado quando o usuário navega para o caminho "/camera" ou "/";
-  - 1 `not_connected`:
-    - Mostra um texto de erro na tela quando o sistema de simulação não está
-      conectado.
 - Entidades que herdam de `Wt::WWidget` no namespace `widgets`:
   - 2 `page_anchor`:
     - Desenha o botão de troca de página recebendo os argumentos
       - Posição do canto superior esquerdo;
       - Entidade que implementa `view` a ser mostrada quando se clica no botão;
+  - 2 `camera_panel`:
+    - Desenha o painel de controle da câmera de acordo com o estado das
+      detecções e atualiza a contagem quando esta muda;
 - 1 `domestic_supervisor` que herda de `Wt::WApplication`:
   - Representa a aplicação como um todo;
-  - Define os comportamentos de tempo de vida do servidor (startup, connect,
+  - Define os comportamentos de tempo de vida da aplicação (startup, connect,
     run, shutdown...);
+- 1 `domestic_server` que herda de `Wt::WServer`:
+  - Configura o servidor para mandar a aplicação sob multiplas URLs;
+  - Cria sessões de `domstic_supervisor` sob demanda. Portanto, na prática, há
+    muitas de todas as entidades, mas em nome da simplicidade, apenas o número
+    presente numa única sessão é contado nessa lista;
 
 ### Entidades do simulador
 
 - Namespace `controllers`:
-  - 1 `mqtt` que herda de `mqtt::callback` e `mqtt::iaction_listener`:
-    - É responsável por processar mensagens de entrada e fornecer
-      uma API para enviar mensagens ao supervisório;
-    - Fornece métodos para enviar mensagens de notificação de mudança de estado
-      de lâmpadas e/ou travas;
-    - Registra callbacks para realizar ações quando requisições de mudança
-      estado de lampadas e/ou travas forem recebidas;
   - 1 `image_loop`:
     - Coleta e envia as imagens da webcam pelo MQTT;
     - Roda em loop numa thread separada gerenciada por si;
     - É um objeto passível de ser chamado como função;
 - 1 `domestic_simulator` que herda de `Wt::WApplication`:
   - Representa a aplicação como um todo;
-  - Define os comportamentos de tempo de vida do servidor (startup, connect,
+  - Define os comportamentos de tempo de vida da aplicação (startup, connect,
     run, shutdown...);
 
 ## Reconhecimentos

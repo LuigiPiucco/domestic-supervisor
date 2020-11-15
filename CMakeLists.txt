@@ -14,11 +14,33 @@ find_package(dlib CONFIG REQUIRED)
 find_package(wt CONFIG REQUIRED)
 find_package(PahoMqttCpp CONFIG REQUIRED)
 find_package(spdlog CONFIG REQUIRED)
+find_package(Boost CONFIG REQUIRED COMPONENTS ALL)
+find_package(ZLIB MODULE REQUIRED)
 
-set(common_srcs src/common/device.cpp src/common/state.cpp src/common/view.cpp
-                src/common/blueprint.cpp)
+set(common_srcs
+    src/common/device.cpp
+    src/common/state.cpp
+    src/common/view.cpp
+    src/common/blueprint.cpp
+    src/common/constants.cpp
+    src/common/icon_button.cpp
+    src/common/mqtt.cpp)
+set(supervisor_srcs
+    src/supervisor/main.cpp
+    src/supervisor/deepnet.cpp
+    src/supervisor/camera_panel.cpp
+    src/supervisor/camera.cpp
+    src/supervisor/domestic_supervisor.cpp
+    src/supervisor/page_anchor.cpp
+    src/supervisor/domestic_server.cpp
+    src/supervisor/dynamic_image.cpp)
+set(simulator_srcs src/simulator/main.cpp src/simulator/image_loop.cpp
+                   src/simulator/domestic_simulator.cpp)
+set(asset_files
+    blueprint.jpg lit-lightbulb.svg locked-padlock.svg unlit-lightbulb.svg
+    unlocked-padlock.svg mmod_human_face_detector.dat)
 
-add_executable(domestic-supervisor src/supervisor/main.cpp ${common_srcs})
+add_executable(domestic-supervisor ${supervisor_srcs} ${common_srcs})
 set_target_properties(
   domestic-supervisor
   PROPERTIES CXX_EXTENSIONS OFF
@@ -27,7 +49,8 @@ set_target_properties(
 target_include_directories(
   domestic-supervisor
   PRIVATE $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/include/supervisor>
-          $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/include/common>)
+          $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/include/common>
+          $<BUILD_INTERFACE:${Boost_INCLUDE_DIRS}>)
 target_link_libraries(
   domestic-supervisor
   PRIVATE Wt::Wt
@@ -35,12 +58,13 @@ target_link_libraries(
           dlib::dlib
           PahoMqttCpp::paho-mqttpp3
           spdlog::spdlog
+          ${Boost_LIBRARIES}
+          ZLIB::ZLIB
           opencv_core
           opencv_imgcodecs)
-target_compile_options(domestic-supervisor PRIVATE -nostdinc)
 target_link_options(domestic-supervisor PRIVATE -stdlib=libc++ -fuse-ld=lld)
 
-add_executable(domestic-simulator src/simulator/main.cpp ${common_srcs})
+add_executable(domestic-simulator ${simulator_srcs} ${common_srcs})
 set_target_properties(
   domestic-simulator
   PROPERTIES CXX_EXTENSIONS OFF
@@ -60,7 +84,6 @@ target_link_libraries(
           opencv_imgcodecs
           opencv_imgproc
           opencv_videoio)
-target_compile_options(domestic-simulator PRIVATE -nostdinc)
 target_link_options(domestic-simulator PRIVATE -stdlib=libc++ -fuse-ld=lld)
 
 if(ipo_supported)
@@ -75,5 +98,9 @@ endif()
 
 install(TARGETS domestic-supervisor domestic-simulator
         DESTINATION ${CMAKE_INSTALL_BINDIR})
-configure_file(${CMAKE_CURRENT_LIST_DIR}/compile_flags.txt
-               ${CMAKE_BINARY_DIR}/compile_flags.txt COPY_ONLY)
+
+foreach(asset ${asset_files})
+  configure_file(
+    ${CMAKE_CURRENT_LIST_DIR}/assets/${asset}
+    ${CMAKE_BINARY_DIR}/assets/${CMAKE_BUILD_TYPE}/${asset} COPYONLY)
+endforeach()

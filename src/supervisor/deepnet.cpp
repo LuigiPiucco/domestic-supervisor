@@ -1,7 +1,7 @@
 #include "deepnet.hpp"
 
 controllers::deepnet::deepnet()
-    : running(true), enabled(false), prev_detections(0)
+    : running(true), enabled(false), processing(false), prev_detections(0)
 {
     dlib::deserialize("assets/mmod_human_face_detector.dat") >> net;
 

@@ -54,7 +54,7 @@
         src = inputs.wt;
 
         nativeBuildInputs = with pkgs; [ cmake llvmPackages_11.bintools ];
-        buildInputs = with pkgs; [ boostClang pango graphicsmagick libGLU ];
+        buildInputs = with pkgs; [ boostClang pango graphicsmagick libGLU zlib ];
         cmakeFlags = [
           "--no-warn-unused-cli"
           "-DWT_CPP14_MODE=-std=c++14"
@@ -74,7 +74,12 @@
         src = inputs.dlib;
 
         nativeBuildInputs = with pkgs; [ cmake pkgs.llvmPackages_11.bintools ];
-        buildInputs = with pkgs; [ cudaPackages.cudatoolkit_11 ];
+        buildInputs = with pkgs; [
+          cudaPackages.cudatoolkit_11
+          cudnn_cudatoolkit_11
+          openblas
+          lapack
+        ];
         cmakeFlags = [
           "--no-warn-unused-cli"
           "-DUSE_AVX_INSTRUCTIONS=1"

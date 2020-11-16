@@ -9,7 +9,7 @@ domestic_supervisor::domestic_supervisor(Wt::WEnvironment const &env,
     enableInternalPaths();
     enableUpdates();
 
-    setTitle("Domestic Sypervisor");
+    setTitle("Domestic Supervisor");
 
     styleSheet().addRule(
         "*", "font-size: 18px; font-family: Fira Code, monospace; "
@@ -47,6 +47,7 @@ domestic_supervisor::domestic_supervisor(Wt::WEnvironment const &env,
         &domestic_supervisor::perform_deepnet_state_change, this);
 
     deepnet.set_enabled();
+    deepnet.set_processing();
 }
 
 domestic_supervisor::~domestic_supervisor()
@@ -117,7 +118,7 @@ void domestic_supervisor::perform_image_swap(
 void domestic_supervisor::receive_image(
     controllers::mqtt::incoming_event const &ctx)
 {
-    if (ctx.topic() == cam_topic) {
+    if (ctx.topic() == cam_topic && deepnet.state_enabled()) {
         deepnet.enqueue(std::string(ctx.message()));
     }
 }

@@ -58,8 +58,6 @@ auto controllers::deepnet::state_processing() const noexcept -> bool
 
 void controllers::deepnet::operator()()
 {
-    namespace io = boost::iostreams;
-
     while (running) {
         if (std::scoped_lock l{processing_queue_mutex};
             !enabled || processing_queue.empty()) {

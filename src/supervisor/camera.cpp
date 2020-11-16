@@ -12,8 +12,7 @@ views::camera::camera() : image_resource(std::make_shared<dynamic_image>())
     Wt::WLength const full{100, Wt::LengthUnit::Percentage};
     addCssRule("#" + id(), "margin: calc(50vh - " + std::to_string(height / 2) +
                                "px) auto;");
-    addCssRule(".side-image-" + id(),
-               "opacity: 0.5; backdrop-filter: blur(32px);");
+    addCssRule(".side-image-" + id(), "opacity: 0.5; filter: blur(32px);");
 
     center_image = addNew<Wt::WImage>(Wt::WLink(image_resource));
     center_image->resize(width, height);

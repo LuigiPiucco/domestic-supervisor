@@ -17,11 +17,15 @@ void dynamic_image::handleRequest(Wt::Http::Request const &request,
     res.done();
 
     res.handleRequest(request, response);
+
+    response.addHeader("Cache-Control", "no-cache, no-store, must-revalidate");
+    response.addHeader("Pragma", "no-cache");
+    response.addHeader("Expires", "0");
 }
 
 void dynamic_image::set_image(const controllers::deepnet::image &im)
 {
     image = im;
 
-    setChanged();
+    dataChanged();
 }

@@ -37,8 +37,13 @@ set(supervisor_srcs
 set(simulator_srcs src/simulator/main.cpp src/simulator/image_loop.cpp
                    src/simulator/domestic_simulator.cpp)
 set(asset_files
-    blueprint.jpg lit-lightbulb.svg locked-padlock.svg unlit-lightbulb.svg
-    unlocked-padlock.svg mmod_human_face_detector.dat)
+    blueprint.jpg
+    lit-lightbulb.svg
+    locked-padlock.svg
+    unlit-lightbulb.svg
+    unlocked-padlock.svg
+    mmod_human_face_detector.dat
+    wt_config.xml)
 
 add_executable(domestic-supervisor ${supervisor_srcs} ${common_srcs})
 set_target_properties(

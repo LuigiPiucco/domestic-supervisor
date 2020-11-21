@@ -20,7 +20,7 @@ public:
     device(device &&d) = default;
     auto operator=(device const &rhs) -> device & = default;
     auto operator=(device &&rhs) -> device & = default;
-    constexpr ~device() = default;
+    ~device() = default;
 
     /// Activate this device.
     void set() noexcept;

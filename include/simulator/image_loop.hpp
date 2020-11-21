@@ -6,6 +6,7 @@
 #include <opencv2/core/mat.hpp>
 #include <opencv2/videoio.hpp>
 #include <thread>
+#include <vector>
 
 namespace controllers {
     class image_loop {

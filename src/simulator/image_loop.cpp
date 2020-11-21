@@ -1,8 +1,4 @@
 #include "image_loop.hpp"
-#include "mqtt.hpp"
-#include <pthread.h>
-#include <thread>
-#include <vector>
 
 controllers::image_loop::image_loop(controllers::mqtt &comms) noexcept
     : capture(0), comms(comms), running(true)

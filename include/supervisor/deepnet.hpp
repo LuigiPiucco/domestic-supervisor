@@ -2,10 +2,6 @@
 
 #include "event.hpp"
 #include <array>
-#include <boost/iostreams/filter/gzip.hpp>
-#include <boost/iostreams/filtering_stream.hpp>
-#include <boost/iostreams/traits.hpp>
-#include <boost/range.hpp>
 #include <dlib/dnn.h>
 #include <mutex>
 #include <queue>
@@ -13,65 +9,6 @@
 
 static constexpr int width = 1280;
 static constexpr int height = 720;
-constexpr std::size_t bmp_header_size = 54;
-constexpr int bmp_filesize = bmp_header_size + 3 * width * height;
-
-constexpr std::array<unsigned char, bmp_header_size> bmp_header = {
-    'B',
-    'M',
-    (bmp_filesize >> 0) & 0xFF,
-    (bmp_filesize >> 1) & 0xFF,
-    (bmp_filesize >> 2) & 0xFF,
-    (bmp_filesize >> 3) & 0xFF,
-    0,
-    0,
-    0,
-    0,
-    54,
-    0,
-    0,
-    0,
-    40,
-    0,
-    0,
-    0,
-    (width >> 0) & 0xFF,
-    (width >> 1) & 0xFF,
-    (width >> 2) & 0xFF,
-    (width >> 3) & 0xFF,
-    (height >> 0) & 0xFF,
-    (height >> 1) & 0xFF,
-    (height >> 2) & 0xFF,
-    (height >> 3) & 0xFF,
-    1,
-    0,
-    24,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-};
 
 namespace controllers {
     class deepnet {

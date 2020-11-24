@@ -9,6 +9,7 @@ check_ipo_supported(RESULT ipo_supported OUTPUT error)
 set(CMAKE_CXX_VISIBILITY_PRESET hidden)
 set(CMAKE_VISIBILITY_INLINES_HIDDEN 1)
 
+set(Boost_USE_STATIC_LIBS ON)
 find_package(Boost 1.74 CONFIG REQUIRED COMPONENTS iostreams headers filesystem
                                                    thread program_options)
 find_package(dlib CONFIG REQUIRED)
@@ -16,7 +17,6 @@ find_package(PahoMqttCpp CONFIG REQUIRED)
 find_package(spdlog CONFIG REQUIRED)
 find_package(wt CONFIG REQUIRED)
 find_package(OpenCV CONFIG REQUIRED)
-set(Boost_USE_STATIC_LIBS ON)
 
 set(common_srcs
     src/common/device.cpp
@@ -68,8 +68,6 @@ target_link_libraries(
           opencv_core
           opencv_imgcodecs
           ${system_libs})
-target_link_options(domestic-supervisor PRIVATE -static-libgcc
-                    -static-libstdc++)
 
 add_executable(domestic-simulator ${simulator_srcs} ${common_srcs})
 set_target_properties(
@@ -95,7 +93,6 @@ target_link_libraries(
           opencv_imgproc
           opencv_videoio
           ${system_libs})
-target_link_options(domestic-simulator PRIVATE -static-libgcc -static-libstdc++)
 
 if(ipo_supported)
   message(STATUS "IPO/LTO enabled")

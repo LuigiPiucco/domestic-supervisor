@@ -65,6 +65,7 @@
 
         projectBoost = (pkgsCross.boost174.override {
           stdenv = projectStdenv;
+          zlib = pkgsCross.zlib.static;
           enableStatic = true;
           enableShared = false;
           taggedLayout = false;
@@ -102,7 +103,7 @@
             "-DBOOST_DYNAMIC=OFF"
             "-DBUILD_TESTS=OFF"
             "-DBUILD_EXAMPLES=OFF"
-            "-DBUILD_SHARED_LIBS=OFF"
+            "-DSHARED_LIBS=OFF"
           ] ++ pkgs.lib.optionals projectStdenv.targetPlatform.isLinux [
             "-DWT_WRASTERIMAGE_IMPLEMENTATION=GraphicsMagick"
             "-DGM_PREFIX=${pkgs.graphicsmagick}"
@@ -127,6 +128,7 @@
             "--no-warn-unused-cli"
             "-DUSE_AVX_INSTRUCTIONS=1"
             "-DDLIBUSECUDA=1"
+            "-DDLIB_NO_GUI_SUPPORT=ON"
             "-DBUILD_SHARED_LIBS=OFF"
           ];
         };
@@ -139,7 +141,7 @@
 
           nativeBuildInputs = with pkgs; [ cmake ];
           buildInputs = with pkgsCross;
-            [ projectBoost ]
+            [ projectBoost zlib.static ]
             ++ lib.optionals projectStdenv.targetPlatform.isLinux [
               ffmpeg_4
               gst_all_1.gstreamer
@@ -155,6 +157,10 @@
             "-DBUILD_PERF_TESTS=OFF"
             "-DBUILD_opencv_apps=OFF"
             "-DBUILD_SHARED_LIBS=OFF"
+            "-DENABLE_PIC=OFF"
+            "-DWITH_ZLIB=OFF"
+            "-DWITH_GTK=OFF"
+            "-DWITH_WIN32UI=OFF"
           ] ++ pkgsCross.lib.optionals projectStdenv.targetPlatform.isWindows
             [ "-DWITH_MSMF=OFF" ];
         };
@@ -209,12 +215,17 @@
 
             src = self;
 
+            strictDeps = true;
+
             nativeBuildInputs = with pkgs;
               [ cmake ninja ] ++ lib.optional (!isShell) autoPatchelfHook;
             buildInputs =
               [ projectBoost wt dlib opencv paho-mqtt-cpp paho-mqtt-c spdlog ]
-              ++ pkgsCross.lib.optional projectStdenv.targetPlatform.isLinux
-              pkgsCross.openblas;
+              ++ pkgsCross.lib.optionals projectStdenv.targetPlatform.isLinux [
+                pkgsCross.openblas
+                pkgsCross.graphicsmagick
+                pkgsCross.libGL
+              ];
             cmakeFlags = [
               "--no-warn-unused-cli"
               "-DPAHO_MQTT_C_LIBRARIES=${paho-mqtt-c}/lib/libpaho-mqtt3a${

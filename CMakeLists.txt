@@ -10,7 +10,7 @@ set(CMAKE_CXX_VISIBILITY_PRESET hidden)
 set(CMAKE_VISIBILITY_INLINES_HIDDEN 1)
 
 find_package(Boost 1.74 CONFIG REQUIRED COMPONENTS iostreams headers filesystem
-                                                   thread)
+                                                   thread program_options)
 find_package(dlib CONFIG REQUIRED)
 find_package(PahoMqttCpp CONFIG REQUIRED)
 find_package(spdlog CONFIG REQUIRED)

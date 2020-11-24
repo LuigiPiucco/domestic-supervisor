@@ -11,16 +11,23 @@ Um projeto de brinquedo de simulação de casa automática.
 <img src="https://upload.wikimedia.org/wikipedia/en/thumb/9/9e/Flag_of_Japan.svg/1920px-Flag_of_Japan.svg.png" alt="日本語" title="日本語で読みます" width="32px" />
 </a>
 
+<!-- markdown-toc start - Don't edit this section. Run M-x markdown-toc-refresh-toc -->
+
 **Table of Contents**
 
 - [domestic-supervisor](#domestic-supervisor)
   - [Projeto](#projeto)
   - [Design da interface](#design-da-interface)
+  - [Instalação](#instalação)
+  - [Execução](#execução)
+  - [Compilando](#compilando)
   - [Implementação](#implementação)
     - [Entidades comuns](#entidades-comuns)
     - [Entidades do supervisório](#entidades-do-supervisório)
     - [Entidades do simulador](#entidades-do-simulador)
   - [Reconhecimentos](#reconhecimentos)
+
+<!-- markdown-toc end -->
 
 ## Projeto
 
@@ -99,7 +106,6 @@ código de C++ moderno.
   - 1 `blueprint`
     - É o widget raiz da tela da planta baixa;
     - É mostrado quando o usuário navega para o caminho "/blueprint";
-  
 
 ### Entidades do supervisório
 
@@ -122,7 +128,7 @@ código de C++ moderno.
   - 1 `camera`:
     - É o widget raiz da tela da câmera;
     - É mostrado quando o usuário navega para o caminho "/camera" ou "/";
-- Entidades que herdam de `Wt::WWidget` no namespace `widgets`:
+- Entidades que herdam de um descendente de `Wt::WWidget` no namespace `widgets`:
   - 2 `page_anchor`:
     - Desenha o botão de troca de página recebendo os argumentos
       - Posição do canto superior esquerdo;

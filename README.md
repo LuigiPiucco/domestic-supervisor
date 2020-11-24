@@ -11,16 +11,23 @@ A toy smart home simulator project.
 <img src="https://upload.wikimedia.org/wikipedia/en/thumb/9/9e/Flag_of_Japan.svg/1920px-Flag_of_Japan.svg.png" alt="日本語" title="日本語で読みます" width="32px" />
 </a>
 
+<!-- markdown-toc start - Don't edit this section. Run M-x markdown-toc-refresh-toc -->
+
 **Table of Contents**
 
 - [domestic-supervisor](#domestic-supervisor)
   - [Project](#project)
   - [Interface design](#interface-design)
+  - [Installation](#installation)
+  - [Running](#running)
+  - [Building](#building)
   - [Implementation](#implementation)
     - [Common entities](#common-entities)
     - [Supervisor entities](#supervisor-entities)
     - [Simulator entities](#simulator-entities)
-  - [Acknowledgements](#acknowledgements)
+  - [Acknowledgments](#acknowledgments)
+
+<!-- markdown-toc end -->
 
 ## Project
 
@@ -117,7 +124,7 @@ good code practices.
   - 1 `camera`:
     - The camera view's root widget;
     - Shown when the user navigates to the path "/camera" or "/";
-- Entities that inherit from a descendant of `Wt::WWidget` in the `widgets` 
+- Entities that inherit from a descendant of `Wt::WWidget` in the `widgets`
   namespace:
   - 1 `camera_panel`:
     - Draws the camera control panel according to the detection state and

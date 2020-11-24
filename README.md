@@ -153,15 +153,31 @@ good code practices.
 
 Light bulb icons made by
 [Good Ware](https://www.flaticon.com/authors/good-ware "Good Ware") from
-[https://www.flaticon.com](https://www.flaticon.com "Flaticon").
+https://www.flaticon.com
 
 Padlock icons made by Fabián Alexis,
 [CC BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0 "CC BY-SA 3.0"),
 via Wikimedia Commons
 
-Note about CC BY-SA: As I understand it, since the icons under CC are only
-collected, not modified in any way, I'm allowed to license my own work under a
-different license.
+Wt framework made by Emweb,
+[GPL-2.0-only](https://github.com/emweb/wt/blob/master/LICENSE "Wt's Github license"),
+available at https://www.webtoolkit.eu/wt
+
+Dlib library,
+[BSL-1.0](http://dlib.net/license.html "Dlib's license"), available at
+http://dlib.net
+
+OpenCV library,
+[Apache-2.0](https://github.com/opencv/opencv/blob/master/LICENSE "OpenCV's Github license"),
+available at https://opencv.org
+
+Paho MQTT C++ library made by the Eclipse Foundation,
+[EDL-v1.0](https://github.com/eclipse/paho.mqtt.cpp/blob/master/edl-v10 "Paho's Github license"),
+available at https://github.com/eclipse/paho.mqtt.cpp
+
+spdlog C++ library,
+[MIT](https://github.com/gabime/spdlog/blob/v1.x/LICENSE "spdlog's Github licence"),
+available at https://github.com/gabime/spdlog
 
 [1]: https://builtwithnix.org "Built with nix"
 [2]: https://github.com/LuigiPiucco/domestic-supervisor/blob/master/LICENSE "Github license"

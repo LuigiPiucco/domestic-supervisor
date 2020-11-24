@@ -156,15 +156,31 @@ código de C++ moderno.
 
 Ícones das luzes feitos por
 [Good Ware](https://www.flaticon.com/authors/good-ware "Good Ware") de
-[https://www.flaticon.com](https://www.flaticon.com "Flaticon").
+https://www.flaticon.com
 
 Ícones dos cadeados feitos por
 [CC BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0 "CC BY-SA 3.0"),
 via Wikimedia Commons
 
-Nota sobre CC BY-SA: Pelo que eu entendi, como os ícones regidos pela licença CC
-são apenas coletados, e não modificados de alguma forma, tenho permissão para
-licenciar minhas obra sob uma licença diferente.
+Framework Wt feito pela Emweb,
+[GPL-2.0-only](https://github.com/emweb/wt/blob/master/LICENSE "Licença do Wt no Github"),
+disponível em https://www.webtoolkit.eu/wt
+
+Biblioteca Dlib,
+[BSL-1.0](http://dlib.net/license.html "Licença do Dlib"), disponível em
+http://dlib.net
+
+Biblioteca OpenCV,
+[Apache-2.0](https://github.com/opencv/opencv/blob/master/LICENSE "Licença do OpenCV no Github"),
+disponível em https://opencv.org
+
+Biblioteca C++ Paho MQTT feita pela Eclipse Foundation,
+[EDL-v1.0](https://github.com/eclipse/paho.mqtt.cpp/blob/master/edl-v10 "Licença do Paho no Github"),
+disponível em https://github.com/eclipse/paho.mqtt.cpp
+
+Biblioteca C++ spdlog,
+[MIT](https://github.com/gabime/spdlog/blob/v1.x/LICENSE "Licença do spdlog no Github"),
+disponível em https://github.com/gabime/spdlog
 
 [1]: https://builtwithnix.org "Construído com nix"
 [2]: https://github.com/LuigiPiucco/domestic-supervisor/blob/master/LICENSE "Licença do Github"

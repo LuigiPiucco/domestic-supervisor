@@ -90,7 +90,7 @@ few libraries best used dynamically:
 
 To install everything in Ubuntu, this may be run:
 
-`sh apt install graphicsmagick llvm-11 libc++-11 libc++abi-11`
+`# apt install graphicsmagick llvm-11 libc++-11 libc++abi-11`
 
 ## Running
 

@@ -118,7 +118,7 @@
 
           nativeBuildInputs = with pkgs; [ cmake ];
           buildInputs = with pkgsCross;
-            lib.optionals (system == "x86_64-linux") [
+            lib.optionals projectStdenv.targetPlatform.isLinux [
               openblas
               lapack
               cudaPackages.cudatoolkit_11
@@ -126,8 +126,8 @@
             ];
           cmakeFlags = [
             "--no-warn-unused-cli"
-            "-DUSE_AVX_INSTRUCTIONS=1"
-            "-DDLIBUSECUDA=1"
+            "-DUSE_AVX_INSTRUCTIONS=ON"
+            "-DDLIBUSECUDA=ON"
             "-DDLIB_NO_GUI_SUPPORT=ON"
             "-DBUILD_SHARED_LIBS=OFF"
           ];
@@ -149,7 +149,7 @@
             ];
           cmakeFlags = [
             "--no-warn-unused-cli"
-            "-DCPU_BASELINE=AVX"
+            "-DCPU_BASELINE=AVX2"
             "-DENABLE-CXX11=ON"
             "-DENABLE_PRECOMPILED_HEADERS=OFF"
             "-DBUILD_TESTS=OFF"

@@ -73,6 +73,76 @@ Blue print view:
 
 ![Blue print view](./assets/Blueprint.png)
 
+## Installation
+
+These are not meant to be installed system-wide, I don't expect anyone to use
+them on a daily basis. Instead, a tarball is provided under releases, which
+contains the two binaries and some assets. _The folder structure of the tarball
+must be preserved!_
+
+The provided binaries are mostly statically linked, the only dependencies are a
+few libraries best used dynamically:
+
+- GraphicsMagick;
+- xorg (you probably already have this, omitted in the command);
+- LLVM's libunwind;
+- LLVM's libc++ and libc++abi;
+
+To install everything in Ubuntu, this may be run:
+
+`sh apt install graphicsmagick llvm-11 libc++-11 libc++abi-11`
+
+## Running
+
+As for running the programs, there is one prerequisite. A MQTT Broker needs to
+run at the port 14442. You may use any MQTT 5.0 broker, though these programs
+are only tested with an
+[Eclipse Mosquitto Broker](https://mosquitto.org/ "Mosquitto") running inside a
+[docker](https://www.docker.com/ "Docker") container.
+
+Once docker is installed and set up, run this command as root to pull the
+mosquitto image:
+
+`# docker run -p 14442:1883 --name mosquitto -d eclipse-mosquitto `
+
+To stop the container at any time, use:
+
+`# docker stop mosquitto`
+
+It may stop on restart depending or your setup too. To start if you have already
+installed, run instead:
+
+`# docker start mosquito`
+
+Once Mosquitto is ready and running, the programs may be started using these
+parameters:
+
+`$ /path/to/domestic-simulator --docroot ".;/assets" --http-address 0.0.0.0 --http-port 14440 -c /path/to/assets/wt_config.xml`
+
+or
+
+`$ /path/to/domestic-supervisor --docroot ".;/assets" --http-address 0.0.0.0 --http-port 14441 -c /path/to/assets/wt_config.xml`
+
+Then, open up your browser of choice and navigate to `localhost:14440` for the
+simulator and `localhost:14441` for the supervisor.
+
+## Building
+
+The intended build system is NixOS, using the provided `flake.nix`. Compilation
+as a NixOS package is already supported, while support for Windows and other
+distros as target is being worked on.
+
+It should be possible to build this in a standard Linux environment, such as
+Ubuntu or CentOS, but one would need to manually specify dependency paths to
+CMake's CLI. If anyone wants to try, let me know!
+
+To build, simply clone the repository and run the following command at the root
+directory:
+
+`$ nix build '.#domestic-supervisor'`
+
+Note that nix flakes need to be enabled for it to work.
+
 ## Implementation
 
 The project's implementation was done in C++, in accordance to modern C++

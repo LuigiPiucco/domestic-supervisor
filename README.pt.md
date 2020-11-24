@@ -72,6 +72,76 @@ Tela da planta baixa:
 
 ![Tela da planta baixa](./assets/Blueprint.png)
 
+## Instalação
+
+Esses programas não foram feitos para serem instalados a nível de sistema, não é
+esperado que alguém os use no seu dia-a-dia. Em vez disso, um pacote tar é
+fornecido na seção releases, que contém dois binários e alguns recursos. _A
+estrutura de arquivos do pacote deve ser preservada!_
+
+Os binários fornecidos são em sua maioria linkados estaticamente, as únicas
+dependências são bibliotecas melhor usadas dinamicamente:
+
+- GraphicsMagick;
+- xorg (você provavelmente já tem, omitido no comando);
+- libunwind LLVM;
+- libc++ e libc++abi LLVM;
+
+Para instalar tudo no Ubuntu, você pode rodar isso:
+
+`# apt install graphicsmagick llvm-11 libc++-11 libc++abi-11`
+
+## Execução
+
+Para rodar os programas, há um pré-requisito. Um Broker MQTT precisar estar
+rodando na porta 14442. Qualquer Broker com MQTT5.0 deve servir, mas os
+programas são testados apenas com o
+[Broker Eclipse Mosquitto](https://mosquitto.org/ "Mosquitto") rodando dentro de
+um container do [docker](https://www.docker.com/ "Docker").
+
+Quando o docker estiver instalado e configurado, rode este comando como root
+para baixar e rodar a imagem do mosquitto:
+
+`# docker run -p 14442:1883 --name mosquitto -d eclipse-mosquitto `
+
+Para parar o container a qualquer momento, use:
+
+`# docker stop mosquitto`
+
+O container pode parar com reboot dependendo das suas configurações também. Para
+iniciá-lo se já estiver instalado, rode em vez do `run` anterior:
+
+`# docker start mosquitto`
+
+Quando o broker estiver pronto e rodando, os programas podem ser iniciados com
+esses parâmetros:
+
+`$ /caminho/para/domestic-simulator --docroot ".;/assets" --http-address 0.0.0.0 --http-port 14440 -c /caminho/para/assets/wt_config.xml`
+
+ou
+
+`$ /caminho/para/domestic-supervisor --docroot ".;/assets" --http-address 0.0.0.0 --http-port 14441 -c /path/to/assets/wt_config.xml`
+
+Por fim, abra seu navegador preferido e navegue para `localhost:14440` para o
+simulador e `locahost:14441` para o supervisor.
+
+## Compilando
+
+O sistema de compilação por design é o NixOS, usando o `flake.nix` fornecido.
+Compilação como um pacote NixOS já é suportada, e suporte para Windows e outras
+distros Linux como target está sendo desenvolvido.
+
+Deve ser possível compilar em um ambiente Linux padrão, como Ubuntu ou CentOS,
+mas seria necessário especificar manualmente o caminho das dependências para a
+CLI do CMake. Se alguém quiser tentar, me avise!
+
+Para compilar, basta clonar o repositório e rodar o seguinte command na pasta
+raiz:
+
+`$ nix build '.#domestic-supervisor'`
+
+Note que suporte a flakes precisa estar habilitado para funcionar.
+
 ## Implementação
 
 A implementação do projeto foi feita em C++, de acordo com as práticas de bom

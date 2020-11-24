@@ -258,12 +258,21 @@
               "-gstabs";
             dontStrip = true;
           };
+        domestic-supervisor-non-nix = (domestic-supervisor false).overrideAttrs
+          (old: {
+            nativeBuildInputs = pkgsCross.lib.init old.nativeBuildInputs;
+            postFixup = ''
+              find $out -type f -exec patchelf --set-interpreter /lib64/ld-linux.so.2 {} \;
+              find $out -type f -exec patchelf --set-rpath "/lib:/lib64:/usr/lib:/usr/lib64" {} \;
+            '';
+          });
       in {
         devShell = domestic-supervisor true;
         defaultPackage = domestic-supervisor true;
         packages = {
           domestic-supervisor = domestic-supervisor false;
-          inherit opencv dlib wt paho-mqtt-c paho-mqtt-cpp spdlog projectBoost;
+          inherit opencv dlib wt paho-mqtt-c paho-mqtt-cpp spdlog projectBoost
+            domestic-supervisor-non-nix;
         };
       });
 }

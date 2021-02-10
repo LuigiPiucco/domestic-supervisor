@@ -14,11 +14,11 @@
     },
     "flake-utils": {
       "locked": {
-        "lastModified": 1605370193,
-        "narHash": "sha256-YyMTf3URDL/otKdKgtoMChu4vfVL3vCMkRqpGifhUn0=",
+        "lastModified": 1610051610,
+        "narHash": "sha256-U9rPz/usA1/Aohhk7Cmc2gBrEEKRzcW4nwPWMPwja4Y=",
         "owner": "numtide",
         "repo": "flake-utils",
-        "rev": "5021eac20303a61fafe17224c087f5519baed54d",
+        "rev": "3982c9903e93927c2164caa727cd3f6a0e6d14cc",
         "type": "github"
       },
       "original": {
@@ -29,10 +29,8 @@
     },
     "nixpkgs": {
       "locked": {
-        "lastModified": 1605025331,
-        "narHash": "sha256-NNvRgHZ/qRgahBu19hvBWZViEswOwQi8y9QBtL6zc20=",
-        "path": "/nix/store/xs52f36vqa8ddwzx406axdyr5db6wj9r-source",
-        "rev": "ed697cde581ba63e6e9e2f5603b2564a576aff65",
+        "narHash": "sha256-Fzcv+7JE8jy4smpiGTz8oxbxTMEipcn3WrUQfsgyRNY=",
+        "path": "/nix/store/7c4nnmg11yp3z2yqjavjgkb2rjyb9zp5-source",
         "type": "path"
       },
       "original": {
@@ -55,25 +53,25 @@
     "paho-mqtt-c": {
       "flake": false,
       "locked": {
-        "narHash": "sha256-d+mY6dBX0FIzoPOA8qDrn+zr4SyCqAmW7FpSi8zq2A0=",
+        "narHash": "sha256-THNd+0qI1NO8sTtlVlDcVkuKBXj0tsqe58x0l5WQoj4=",
         "type": "tarball",
-        "url": "https://github.com/eclipse/paho.mqtt.c/archive/v1.3.6.tar.gz"
+        "url": "https://github.com/eclipse/paho.mqtt.c/archive/v1.3.8.tar.gz"
       },
       "original": {
         "type": "tarball",
-        "url": "https://github.com/eclipse/paho.mqtt.c/archive/v1.3.6.tar.gz"
+        "url": "https://github.com/eclipse/paho.mqtt.c/archive/v1.3.8.tar.gz"
       }
     },
     "paho-mqtt-cpp": {
       "flake": false,
       "locked": {
-        "narHash": "sha256-nvrqwHtNZSVl8QyEByvO50KlJHjzve/2mBNuipabfGE=",
+        "narHash": "sha256-tcq0a4X5dKE4rnczRMAVe3Wt43YzUKbxsv9Sk+q+IB8=",
         "type": "tarball",
-        "url": "https://github.com/eclipse/paho.mqtt.cpp/archive/v1.1.tar.gz"
+        "url": "https://github.com/eclipse/paho.mqtt.cpp/archive/v1.2.0.tar.gz"
       },
       "original": {
         "type": "tarball",
-        "url": "https://github.com/eclipse/paho.mqtt.cpp/archive/v1.1.tar.gz"
+        "url": "https://github.com/eclipse/paho.mqtt.cpp/archive/v1.2.0.tar.gz"
       }
     },
     "root": {
@@ -103,16 +101,16 @@
     "wt": {
       "flake": false,
       "locked": {
-        "lastModified": 1596447962,
-        "narHash": "sha256-BRWW+AHmoNvKInQZdpze8bVNX3ZhVAAHequ6OlS972g=",
+        "lastModified": 1608053534,
+        "narHash": "sha256-m3eDyGgttHWY7UjWyli2pcH/XqjnF3/te4JVoWr7W5s=",
         "owner": "emweb",
         "repo": "wt",
-        "rev": "9c6b7807b4fdaefe659ff9ab8ff4ba3937e62b2f",
+        "rev": "d3ee790da1826529e3d025d919f5c3608d029562",
         "type": "github"
       },
       "original": {
         "owner": "emweb",
-        "ref": "4.4.0",
+        "ref": "4.5.0",
         "repo": "wt",
         "type": "github"
       }

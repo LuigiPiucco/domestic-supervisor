@@ -15,25 +15,20 @@ auto controllers::mqtt::incoming() noexcept
 
 controllers::mqtt::mqtt(std::string_view id,
                         std::initializer_list<std::string_view> topics)
-    : client(address.data(), id.data())
+    : client(address.data(), id.data(), std::string("/tmp/mqtt-").append(id))
 {
     using namespace std::literals;
 
-    ::mqtt::connect_options conn_opts{};
-    constexpr auto interval = 20;
-    conn_opts.set_keep_alive_interval(interval);
-    conn_opts.set_max_inflight(4);
-    conn_opts.set_clean_start(true);
-    conn_opts.set_clean_session(true);
-    conn_opts.set_mqtt_version(MQTTVERSION_5);
+    constexpr auto interval = 20ms;
+    auto conn_opts = ::mqtt::connect_options_builder()
+        .clean_session()
+        .keep_alive_interval(interval)
+        .max_inflight(4)
+        .finalize();
 
     client.set_callback(*this);
-    client.connect(conn_opts);
-
-    constexpr auto wait_time = 25ms;
-    while (!client.is_connected()) {
-        std::this_thread::sleep_for(wait_time);
-    }
+    auto conn_tok = client.connect(conn_opts);
+    conn_tok->wait();
 
     for (auto const &topic : topics) {
         client.subscribe(std::string(topic), 0);

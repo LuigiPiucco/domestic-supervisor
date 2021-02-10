@@ -3,7 +3,7 @@
   inputs = {
     nixpkgs.url = "nixpkgs";
     wt = {
-      url = "github:emweb/wt/4.4.0";
+      url = "github:emweb/wt/4.5.0";
       flake = false;
     };
     dlib = {
@@ -15,11 +15,11 @@
       flake = false;
     };
     paho-mqtt-cpp = {
-      url = "https://github.com/eclipse/paho.mqtt.cpp/archive/v1.1.tar.gz";
+      url = "https://github.com/eclipse/paho.mqtt.cpp/archive/v1.2.0.tar.gz";
       flake = false;
     };
     paho-mqtt-c = {
-      url = "https://github.com/eclipse/paho.mqtt.c/archive/v1.3.6.tar.gz";
+      url = "https://github.com/eclipse/paho.mqtt.c/archive/v1.3.8.tar.gz";
       flake = false;
     };
     spdlog = {

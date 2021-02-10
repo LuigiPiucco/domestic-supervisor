@@ -19,7 +19,8 @@ domestic_supervisor::domestic_supervisor(Wt::WEnvironment const &env,
 
     container = root()->addNew<Wt::WStackedWidget>();
     camera_page = container->addNew<views::camera>();
-    blueprint_page = container->addNew<views::blueprint>();
+    blueprint_page = container->addNew<views::blueprint>(
+        std::vector<device>{devices.begin(), devices.end()});
     constexpr auto top = 32;
     constexpr auto left = 833;
     auto *to_blueprint_anchor =

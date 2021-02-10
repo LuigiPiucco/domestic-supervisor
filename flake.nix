@@ -29,250 +29,220 @@
     flake-utils.url = "github:numtide/flake-utils";
   };
   outputs = { self, nixpkgs, flake-utils, ... }@inputs:
-    flake-utils.lib.eachSystem [ "x86_64-linux" "x86_64-windows" ] (system:
+    flake-utils.lib.eachSystem [ "x86_64-linux" ] (system:
       let
-        pkgs = import nixpkgs {
+        pkgs-linux = import nixpkgs {
           localSystem = { system = "x86_64-linux"; };
           config = { allowUnfree = true; };
         };
-        pkgsCross = import nixpkgs {
+        pkgs-windows = import nixpkgs {
           localSystem = { system = "x86_64-linux"; };
-          crossSystem = {
-            x86_64-linux = null;
-            x86_64-windows = { config = "x86_64-w64-mingw32"; };
-          }.${system};
-          config = { allowUnfree = true; };
+          crossSystem = { config = "x86_64-w64-mingw32"; };
+          config = {
+            allowUnfree = true;
+            packageOverrides = prev: {
+              boost174 = (prev.boost174.override {
+                stdenv = with prev; overrideCC stdenv buildPackages.gcc10;
+              }).overrideAttrs (old: {
+                preConfigure = old.preConfigure + "export CXX=${prev.pkgsBuildBuild.gcc10}/bin/g++";
+                preBuild = "export CXX=${prev.buildPackages.gcc10}/bin/g++";
+              });
+            };
+          };
         };
 
-        projectStdenv = {
-          x86_64-linux = with pkgsCross;
-            overrideCC stdenv llvmPackages_11.lldClang;
-          x86_64-windows = with pkgsCross;
-            let
-              fun1 = old: {
-                postFixup = old.postFixup + ''
-                  > $out/nix-support/libc-cflags
-                  for dir in ${old.cc}/lib/gcc/*/*/include{,-fixed}; do
-                    echo "-isystem ''${dir}" >> $out/nix-support/libc-cflags
-                  done
-                  echo '-isystem ${old.libc_dev}/include' >> $out/nix-support/libc-cflags
-                  substituteInPlace $out/nix-support/libc-cflags --replace $'\n' ' '
-                '';
-              };
-              gcc_10 = gcc10Stdenv.cc.overrideAttrs fun1;
-            in overrideCC gcc10Stdenv gcc_10;
-        }.${system};
+        wt-fn = pkgs:
+          let stdenv' = with pkgs; overrideCC stdenv buildPackages.gcc10;
+          in stdenv'.mkDerivation {
+            pname = "wt";
+            version = "4.5.0";
 
-        projectBoost = (pkgsCross.boost174.override {
-          stdenv = projectStdenv;
-          zlib = pkgsCross.zlib.static;
-          enableStatic = true;
-          enableShared = false;
-          taggedLayout = false;
-        }).overrideAttrs (old:
-          if projectStdenv.targetPlatform.isWindows then {
-            configureFlags = old.configureFlags
-              ++ [ "--with-toolset=cross-cxx" ];
-            BUILD_CC = "${pkgs.stdenv.cc}/bin/gcc";
-            BUILD_CXX = "${pkgs.stdenv.cc}/bin/g++";
-            preBuild = ''
-              sed -i '7,16d' project-config.jam
+            enableParalellBuilding = true;
+
+            src = inputs.wt;
+
+            nativeBuildInputs = with pkgs.buildPackages; [ cmake ];
+            buildInputs = (with pkgs;
+              [ zlib boost174 ] ++ lib.optionals targetPlatform.isLinux [
+                pango
+                graphicsmagick
+                libGLU
+              ]);
+            cmakeFlags = [
+              "--no-warn-unused-cli"
+              "-DWT_CPP14_MODE=-std=c++14"
+              "-DBUILD_TESTS=OFF"
+              "-DBUILD_EXAMPLES=OFF"
+            ] ++ pkgs.lib.optionals pkgs.targetPlatform.isLinux [
+              "-DWT_WRASTERIMAGE_IMPLEMENTATION=GraphicsMagick"
+              "-DGM_PREFIX=${pkgs.graphicsmagick}"
+            ];
+          };
+
+        paho-mqtt-c-fn = pkgs:
+          let stdenv' = with pkgs; overrideCC stdenv buildPackages.gcc10;
+          in stdenv'.mkDerivation {
+            pname = "paho-mqtt-c";
+            version = "1.3.8";
+
+            src = inputs.paho-mqtt-c;
+
+            preConfigure = ''
+              substituteInPlace src/CMakeLists.txt \
+                --replace RpcRT4 rpcrt4
             '';
-          } else {
-            LD_LIBRARY_PATH =
-              pkgs.lib.makeLibraryPath [ pkgs.llvmPackages_11.libunwind ];
-          });
-        wt = projectStdenv.mkDerivation {
-          name = "wt";
 
-          enableParalellBuilding = true;
-
-          src = inputs.wt;
-
-          nativeBuildInputs = with pkgs; [ cmake ];
-          buildInputs = with pkgsCross;
-            [ projectBoost zlib.static ]
-            ++ lib.optionals projectStdenv.targetPlatform.isLinux [
-              pango
-              graphicsmagick
-              libGLU
+            nativeBuildInputs = with pkgs.buildPackages; [ cmake ];
+            cmakeFlags = [
+              "--no-warn-unused-cli"
+              "-DPAHO_BUILD_STATIC=ON"
             ];
-          cmakeFlags = [
-            "--no-warn-unused-cli"
-            "-DWT_CPP14_MODE=-std=c++14"
-            "-DBOOST_DYNAMIC=OFF"
-            "-DBUILD_TESTS=OFF"
-            "-DBUILD_EXAMPLES=OFF"
-            "-DSHARED_LIBS=OFF"
-          ] ++ pkgs.lib.optionals projectStdenv.targetPlatform.isLinux [
-            "-DWT_WRASTERIMAGE_IMPLEMENTATION=GraphicsMagick"
-            "-DGM_PREFIX=${pkgs.graphicsmagick}"
-          ];
-        };
-        dlib = projectStdenv.mkDerivation {
-          name = "dlib";
+            CFLAGS = with pkgs; lib.optional targetPlatform.isWindows
+              "-D_WINDOWS";
+          };
 
-          enableParallelBuilding = true;
+        paho-mqtt-cpp-fn = pkgs:
+          let stdenv' = with pkgs; overrideCC stdenv buildPackages.gcc10;
+              paho-mqtt-c = paho-mqtt-c-fn pkgs;
+          in stdenv'.mkDerivation {
+            pname = "paho-mqtt-cpp";
+            version = "1.2.0";
 
-          src = inputs.dlib;
+            src = inputs.paho-mqtt-cpp;
 
-          nativeBuildInputs = with pkgs; [ cmake ];
-          buildInputs = with pkgsCross;
-            lib.optionals projectStdenv.targetPlatform.isLinux [
-              openblas
-              lapack
-              cudaPackages.cudatoolkit_11
-              cudnn_cudatoolkit_11
+            nativeBuildInputs = with pkgs.buildPackages; [ cmake ];
+            buildInputs = [ paho-mqtt-c ];
+            cmakeFlags = [
+              "--no-warn-unused-cli"
+              "-DPAHO_WITH_SSL=0"
+              "-DPAHO_MQTT_C_LIBRARIES=${paho-mqtt-c}/lib/libpaho-mqtt3a${with pkgs; lib.optionalString targetPlatform.isWindows ".dll"}.a"
+              "-DPAHO_BUILD_STATIC=ON"
+              "-DCMAKE_POLICY_DEFAULT_CMP0074=NEW"
             ];
-          cmakeFlags = [
-            "--no-warn-unused-cli"
-            "-DUSE_AVX_INSTRUCTIONS=ON"
-            "-DDLIBUSECUDA=ON"
-            "-DDLIB_NO_GUI_SUPPORT=ON"
-            "-DBUILD_SHARED_LIBS=OFF"
-          ];
-        };
-        opencv = projectStdenv.mkDerivation {
-          name = "opencv";
+          };
 
-          enableParallelBuilding = true;
+        dlib-fn = pkgs:
+          let stdenv' = with pkgs; overrideCC stdenv buildPackages.gcc10;
+          in stdenv'.mkDerivation {
+            pname = "dlib";
+            version = "19.21";
 
-          src = inputs.opencv;
+            enableParalellBuilding = true;
 
-          nativeBuildInputs = with pkgs; [ cmake ];
-          buildInputs = with pkgsCross;
-            [ projectBoost zlib.static ]
-            ++ lib.optionals projectStdenv.targetPlatform.isLinux [
-              ffmpeg_4
-              gst_all_1.gstreamer
-              gst_all_1.gst-plugins-good
+            src = inputs.dlib;
+
+            nativeBuildInputs = with pkgs.buildPackages; [ cmake ];
+            buildInputs = with pkgs;
+              lib.optionals targetPlatform.isLinux [
+                openblas
+                lapack
+                cudaPackages.cudatoolkit_11_0
+                cudnn_cudatoolkit_11_0
+              ];
+            cmakeFlags = [
+              "--no-warn-unused-cli"
+              "-DUSE_AVX_INSTRUCTIONS=ON"
+              "-DDLIBUSECUDA=ON"
+              "-DDLIB_NO_GUI_SUPPORT=ON"
+              "-DBUILD_SHARED_LIBS=OFF"
+              "-DCMAKE_CUDA_COMPILER_ID=NVIDIA"
             ];
-          cmakeFlags = [
-            "--no-warn-unused-cli"
-            "-DCPU_BASELINE=AVX2"
-            "-DENABLE-CXX11=ON"
-            "-DENABLE_PRECOMPILED_HEADERS=OFF"
-            "-DBUILD_TESTS=OFF"
-            "-DBUILD_EXAMPLES=OFF"
-            "-DBUILD_PERF_TESTS=OFF"
-            "-DBUILD_opencv_apps=OFF"
-            "-DBUILD_SHARED_LIBS=OFF"
-            "-DENABLE_PIC=OFF"
-            "-DWITH_ZLIB=OFF"
-            "-DWITH_GTK=OFF"
-            "-DWITH_WIN32UI=OFF"
-          ] ++ pkgsCross.lib.optionals projectStdenv.targetPlatform.isWindows
-            [ "-DWITH_MSMF=OFF" ];
-        };
-        paho-mqtt-c = projectStdenv.mkDerivation {
-          name = "paho-mqtt-c";
+          };
 
-          src = inputs.paho-mqtt-c;
+        opencv-fn = pkgs:
+          let stdenv' = with pkgs; overrideCC stdenv buildPackages.gcc10;
+          in stdenv'.mkDerivation {
+            pname = "opencv";
+            version = "4.5.0";
 
-          preConfigure = ''
-            substituteInPlace src/CMakeLists.txt \
-              --replace RpcRT4 rpcrt4
-          '';
+            enableParalellBuilding = true;
 
-          nativeBuildInputs = with pkgs; [ cmake ];
-          cmakeFlags = [
-            "--no-warn-unused-cli"
-            "-DPAHO_BUILD_STATIC=ON"
-            "-DPAHO_BUILD_SHARED=OFF"
-          ];
-          CFLAGS = pkgsCross.lib.optional projectStdenv.targetPlatform.isWindows
-            "-D_WINDOWS";
-        };
-        paho-mqtt-cpp = projectStdenv.mkDerivation {
-          name = "paho-mqtt-cpp";
+            src = inputs.opencv;
 
-          src = inputs.paho-mqtt-cpp;
+            nativeBuildInputs = with pkgs.buildPackages; [ cmake ];
+            buildInputs = with pkgs;
+              [ boost174 zlib ]
+              ++ lib.optionals targetPlatform.isLinux [
+                ffmpeg_4
+                gst_all_1.gstreamer
+                gst_all_1.gst-plugins-good
+              ];
+              cmakeFlags = with pkgs; [
+                "--no-warn-unused-cli"
+                "-DENABLE-CXX11=ON"
+                "-DENABLE_PRECOMPILED_HEADERS=OFF"
+                "-DBUILD_TESTS=OFF"
+                "-DBUILD_EXAMPLES=OFF"
+                "-DBUILD_PERF_TESTS=OFF"
+                "-DBUILD_opencv_apps=OFF"
+                "-DBUILD_SHARED_LIBS=OFF"
+                "-DWITH_GTK=OFF"
+                "-DWITH_WIN32UI=OFF"
+              ] ++ lib.optional targetPlatform.isWindows [
+                "-DBUILD_ZLIB=OFF"
+                "-DWITH_MSMF=OFF"
+                "-DENABLE_PIC=OFF"
+              ] ++ lib.optional targetPlatform.isLinux "-DCPU_BASELINE=AVX2";
+            };
 
-          nativeBuildInputs = with pkgs; [ cmake ];
-          buildInputs = [ paho-mqtt-c ];
-          cmakeFlags = [
-            "--no-warn-unused-cli"
-            "-DPAHO_WITH_SSL=0"
-            "-DPAHO_MQTT_C_LIBRARIES=${paho-mqtt-c}/lib/libpaho-mqtt3a${
-              if projectStdenv.targetPlatform.isLinux then "" else "-static"
-            }.a"
-            "-DCMAKE_POLICY_DEFAULT_CMP0074=NEW"
-            "-DPAHO_BUILD_STATIC=ON"
-            "-DPAHO_BUILD_SHARED=OFF"
-          ];
-        };
-        spdlog = projectStdenv.mkDerivation {
-          name = "spdlog";
+        spdlog-fn = pkgs:
+          let stdenv' = with pkgs; overrideCC stdenv buildPackages.gcc10;
+          in stdenv'.mkDerivation {
+            pname = "spdlog";
+            version = "1.8.1";
 
-          src = inputs.spdlog;
+            enableParalellBuilding = true;
 
-          nativeBuildInputs = with pkgs; [ cmake ];
-          cmakeFlags = [ "--no-warn-unused-cli" ];
-        };
-        domestic-supervisor = isShell:
-          projectStdenv.mkDerivation rec {
+            src = inputs.spdlog;
+
+            nativeBuildInputs = with pkgs.buildPackages; [ cmake ];
+          };
+
+        domestic-supervisor-fn = pkgs:
+          let stdenv' = with pkgs; overrideCC stdenv buildPackages.gcc10;
+              paho-mqtt-c = paho-mqtt-c-fn pkgs;
+              paho-mqtt-cpp = paho-mqtt-cpp-fn pkgs;
+              wt450 = wt-fn pkgs;
+              dlib1921 = dlib-fn pkgs;
+              opencv450 = opencv-fn pkgs;
+              spdlog181 = spdlog-fn pkgs;
+          in stdenv'.mkDerivation rec {
             name = "domestic-supervisor";
 
             src = self;
 
             strictDeps = true;
 
-            nativeBuildInputs = with pkgs;
-              [ cmake ninja ] ++ lib.optional (!isShell) autoPatchelfHook;
-            buildInputs =
-              [ projectBoost wt dlib opencv paho-mqtt-cpp paho-mqtt-c spdlog ]
-              ++ pkgsCross.lib.optionals projectStdenv.targetPlatform.isLinux [
-                pkgsCross.openblas
-                pkgsCross.graphicsmagick
-                pkgsCross.libGL
+            nativeBuildInputs = with pkgs.buildPackages; [ cmake ninja ];
+            buildInputs = with pkgs;
+              [ boost174 paho-mqtt-cpp paho-mqtt-c wt450 dlib1921 opencv450 spdlog181 ]
+              ++ lib.optionals targetPlatform.isLinux [
+                openblas
+                graphicsmagick
+                libGL
               ];
             cmakeFlags = [
               "--no-warn-unused-cli"
-              "-DPAHO_MQTT_C_LIBRARIES=${paho-mqtt-c}/lib/libpaho-mqtt3a${
-                if projectStdenv.targetPlatform.isLinux then "" else "-static"
-              }.a"
+              "-DPAHO_MQTT_C_LIBRARIES=${paho-mqtt-c}/lib/libpaho-mqtt3a${with pkgs; lib.optionalString targetPlatform.isWindows ".dll"}.a"
             ];
 
-            MCFGTHREADS_DLL =
-              pkgsCross.lib.optional projectStdenv.targetPlatform.isWindows
-              "${pkgsCross.windows.mcfgthreads}/bin/mcfgthread-12.dll";
-            PAHO_C_LIB = pkgsCross.lib.optional
-              (isShell && projectStdenv.targetPlatform.isLinux)
-              "${paho-mqtt-c}/lib/libpaho-mqtt3a.a";
-            LD_LIBRARY_PATH = pkgsCross.lib.optional
-              (isShell && projectStdenv.targetPlatform.isLinux)
-              (pkgsCross.lib.makeLibraryPath (buildInputs ++ [
-                pkgsCross.llvmPackages_11.libcxx
-                pkgsCross.llvmPackages_11.libcxxabi
-              ]));
-            CPLUS_INCLUDE_PATH = pkgsCross.lib.optional
-              (isShell && projectStdenv.targetPlatform.isLinux)
-              (pkgs.lib.concatStringsSep ":" [
-                "${pkgsCross.llvmPackages_11.libcxx}/include/c++/v1"
-                "${pkgsCross.llvmPackages_11.libcxxabi}/include"
-                "${projectStdenv.cc.cc}/lib/clang/${projectStdenv.cc.cc.version}/include"
-                "${projectStdenv.cc.libc_dev}/include"
-              ]);
-            LDFLAGS =
-              pkgsCross.lib.optional (projectStdenv.targetPlatform.isWindows)
-              "-gstabs";
-            dontStrip = true;
+            NIX_CFLAGS_LINK = with pkgs; lib.optionalString targetPlatform.isWindows "-static-libstdc++ -static-libgcc";
+            EXTRA_DLLS = with pkgs;
+              lib.optionalString targetPlatform.isWindows
+                "${windows.mcfgthreads}/bin/mcfgthread-12.dll;${zlib}/bin/zlib1.dll;${paho-mqtt-c}/bin/libpaho-mqtt3a.dll";
+            # for devShell
+            PAHO_C_LIB =
+                "${paho-mqtt-c}/lib/libpaho-mqtt3a${with pkgs; lib.optionalString targetPlatform.isWindows ".dll"}.a";
           };
-        domestic-supervisor-non-nix = (domestic-supervisor false).overrideAttrs
-          (old: {
-            nativeBuildInputs = pkgsCross.lib.init old.nativeBuildInputs;
-            postFixup = ''
-              find $out -type f -exec patchelf --set-interpreter /lib64/ld-linux.so.2 {} \;
-              find $out -type f -exec patchelf --set-rpath "/lib:/lib64:/usr/lib:/usr/lib64" {} \;
-            '';
-          });
+
+        domestic-supervisor-linux = domestic-supervisor-fn pkgs-linux;
+        domestic-supervisor-windows = domestic-supervisor-fn pkgs-windows;
+
       in {
-        devShell = domestic-supervisor true;
-        defaultPackage = domestic-supervisor true;
+        devShell = domestic-supervisor-linux;
+        defaultPackage = domestic-supervisor-linux;
         packages = {
-          domestic-supervisor = domestic-supervisor false;
-          inherit opencv dlib wt paho-mqtt-c paho-mqtt-cpp spdlog projectBoost
-            domestic-supervisor-non-nix;
+          inherit domestic-supervisor-linux domestic-supervisor-windows;
         };
       });
 }

@@ -17,7 +17,8 @@ domestic_simulator::domestic_simulator(Wt::WEnvironment const &env,
     styleSheet().addRule("body", "width: 100vw; height: 100vh; overflow: "
                                  "hidden; margin: 0; background-color: black;");
 
-    blueprint_view = root()->addNew<views::blueprint>();
+    blueprint_view = root()->addNew<views::blueprint>(
+        std::vector<device>{devices.begin(), devices.end()});
 
     mqtt.incoming().connect(&domestic_simulator::perform_state_change_mqtt,
                             this);

@@ -1,9 +1,6 @@
 #include "blueprint.hpp"
-#include "event.hpp"
-#include <Wt/WGlobal.h>
-#include <string>
 
-views::blueprint::blueprint() : buttons()
+views::blueprint::blueprint(std::vector<device> const &devices) : buttons()
 {
     setPositionScheme(Wt::PositionScheme::Relative);
 

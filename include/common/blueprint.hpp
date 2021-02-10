@@ -1,6 +1,5 @@
 #pragma once
 
-#include "constants.hpp"
 #include "device.hpp"
 #include "event.hpp"
 #include "icon_button.hpp"
@@ -11,6 +10,7 @@
 #include <Wt/WLink.h>
 #include <array>
 #include <memory>
+#include <string>
 
 namespace views {
     class blueprint final : public view {
@@ -24,7 +24,7 @@ namespace views {
         static constexpr char const *unlocked_padlock_path =
             "assets/unlocked-padlock.svg";
 
-        blueprint();
+        blueprint(std::vector<device> const &devices);
 
         [[nodiscard]] constexpr auto name() const -> std::string_view final
         {
@@ -40,7 +40,7 @@ namespace views {
             -> utils::event<std::size_t> &;
 
     private:
-        std::array<widgets::icon_button *, device_names.size()> buttons;
+        std::vector<widgets::icon_button *> buttons;
         utils::event<std::size_t> _device_clicked;
     };
 } // namespace views

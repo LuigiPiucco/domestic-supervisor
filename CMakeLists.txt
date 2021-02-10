@@ -9,15 +9,29 @@ check_ipo_supported(RESULT ipo_supported OUTPUT error)
 set(CMAKE_CXX_VISIBILITY_PRESET hidden)
 set(CMAKE_VISIBILITY_INLINES_HIDDEN 1)
 
-set(Boost_USE_STATIC_LIBS ON)
-find_package(Boost 1.74 CONFIG REQUIRED COMPONENTS iostreams headers filesystem
-                                                   thread program_options)
+find_package(Boost CONFIG REQUIRED COMPONENTS iostreams headers filesystem
+                                              thread program_options)
 find_package(dlib CONFIG REQUIRED)
 find_package(PahoMqttCpp CONFIG REQUIRED)
 find_package(spdlog CONFIG REQUIRED)
 find_package(wt CONFIG REQUIRED)
 find_package(OpenCV CONFIG REQUIRED)
 
+if(WIN32)
+  set(system_libs crypt32 rpcrt4)
+else()
+  set(system_libs "")
+endif()
+
+set(common_headers
+    include/common/blueprint.hpp
+    include/common/device.hpp
+    include/common/event.hpp
+    include/common/icon_button.hpp
+    include/common/mapper.hpp
+    include/common/mqtt.hpp
+    include/common/state.hpp
+    include/common/view.hpp)
 set(common_srcs
     src/common/device.cpp
     src/common/state.cpp
@@ -37,38 +51,47 @@ set(supervisor_srcs
 set(simulator_srcs src/simulator/main.cpp src/simulator/image_loop.cpp
                    src/simulator/domestic_simulator.cpp)
 
-if(WIN32)
-  set(system_libs ws2_32 crypt32 rpcrt4)
-else()
-  set(system_libs "")
-endif()
-
-add_executable(domestic-supervisor ${supervisor_srcs} ${common_srcs})
+add_library(domestic-lib STATIC ${common_srcs})
 set_target_properties(
-  domestic-supervisor
+  domestic-lib
   PROPERTIES CXX_EXTENSIONS OFF
              CXX_STANDARD 20
-             CXX_STANDARD_REQUIRED ON)
-target_compile_features(domestic-supervisor PRIVATE cxx_std_20)
-target_compile_options(domestic-supervisor PRIVATE -Wall)
+             CXX_STANDARD_REQUIRED ON
+             PUBLIC_HEADER "${common_headers}")
+target_compile_features(domestic-lib PRIVATE cxx_std_20)
+target_compile_options(domestic-lib PRIVATE -Wall)
 target_include_directories(
-  domestic-supervisor
-  PRIVATE $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/include/supervisor>
-          $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/include/common>
-          $<BUILD_INTERFACE:${Boost_INCLUDE_DIRS}>)
+  domestic-lib
+  PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/include/common>
+         $<INSTALL_INTERFACE:include/common>
+  PRIVATE $<BUILD_INTERFACE:${Boost_INCLUDE_DIRS}>)
 target_link_libraries(
-  domestic-supervisor
-  PRIVATE ${Boost_LIBRARIES}
+  domestic-lib
+  PUBLIC ${Boost_LIBRARIES}
+          ${system_libs}
           Wt::Wt
-          Wt::HTTP
           dlib::dlib
           PahoMqttCpp::paho-mqttpp3-static
           spdlog::spdlog
           opencv_core
-          opencv_imgcodecs
-          ${system_libs})
+          opencv_videoio
+          opencv_imgcodecs)
 
-add_executable(domestic-simulator ${simulator_srcs} ${common_srcs})
+add_executable(domestic-supervisor ${supervisor_srcs})
+set_target_properties(
+  domestic-supervisor
+  PROPERTIES CXX_EXTENSIONS OFF
+             CXX_STANDARD 20
+             CXX_STANDARD_REQUIRED ON
+             )
+target_compile_features(domestic-supervisor PRIVATE cxx_std_20)
+target_compile_options(domestic-supervisor PRIVATE -Wall)
+target_include_directories(
+  domestic-supervisor
+  PRIVATE $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/include/supervisor>)
+target_link_libraries(domestic-supervisor PRIVATE Wt::HTTP domestic-lib)
+
+add_executable(domestic-simulator ${simulator_srcs})
 set_target_properties(
   domestic-simulator
   PROPERTIES CXX_EXTENSIONS OFF
@@ -78,23 +101,13 @@ target_compile_features(domestic-simulator PRIVATE cxx_std_20)
 target_compile_options(domestic-simulator PRIVATE -Wall)
 target_include_directories(
   domestic-simulator
-  PRIVATE $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/include/simulator>
-          $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/include/common>)
-target_link_libraries(
-  domestic-simulator
-  PRIVATE ${Boost_LIBRARIES}
-          Wt::Wt
-          Wt::HTTP
-          PahoMqttCpp::paho-mqttpp3-static
-          spdlog::spdlog
-          opencv_core
-          opencv_imgcodecs
-          opencv_imgproc
-          opencv_videoio
-          ${system_libs})
+  PRIVATE $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/include/simulator>)
+target_link_libraries(domestic-simulator PRIVATE Wt::HTTP domestic-lib)
 
-if(ipo_supported)
+if(ipo_supported AND NOT WIN32)
   message(STATUS "IPO/LTO enabled")
+  set_target_properties(domestic-lib
+                        PROPERTIES INTERPROCEDURAL_OPTIMIZATION TRUE)
   set_target_properties(domestic-supervisor
                         PROPERTIES INTERPROCEDURAL_OPTIMIZATION TRUE)
   set_target_properties(domestic-simulator
@@ -103,9 +116,18 @@ else()
   message(STATUS "IPO/LTO not supported! <${error}>")
 endif()
 
-install(TARGETS domestic-supervisor domestic-simulator
-        DESTINATION ${CMAKE_INSTALL_BINDIR})
+install(TARGETS domestic-lib
+                EXPORT domestic-lib
+                ARCHIVE
+                PUBLIC_HEADER)
+install(EXPORT domestic-lib
+               NAMESPACE domestic-supervisor::
+               FILE domestic-lib-config.cmake
+               DESTINATION lib/cmake/domestic-supervisor)
+install(TARGETS domestic-supervisor domestic-simulator)
 install(DIRECTORY assets TYPE BIN)
 if(WIN32)
-  install(FILES $ENV{MCFGTHREADS_DLL} TYPE BIN)
+  foreach(DLL $ENV{EXTRA_DLLS})
+    install(FILES ${DLL} TYPE BIN)
+  endforeach()
 endif()

@@ -10,9 +10,9 @@
 #include <Wt/WRasterImage.h>
 #include <Wt/WResource.h>
 
-class dynamic_image : public Wt::WResource {
+class dynamic_image : public Wt::WRasterImage {
 public:
-    dynamic_image() = default;
+    dynamic_image();
     dynamic_image(dynamic_image const &d) = delete;
     dynamic_image(dynamic_image &&d) = delete;
     auto operator=(dynamic_image const &d) -> dynamic_image & = delete;
@@ -23,7 +23,4 @@ public:
 
     void handleRequest(Wt::Http::Request const &request,
                        Wt::Http::Response &response) override;
-
-private:
-    controllers::deepnet::image image;
 };

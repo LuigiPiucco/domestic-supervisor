@@ -69,7 +69,7 @@ void domestic_supervisor::perform_path_change(std::string const &ctx)
     }
     else {
         Wt::WApplication::instance()->setInternalPath(
-            std::string(camera_page->path()), true);
+            std::string(camera_page->path()), false);
     }
 }
 

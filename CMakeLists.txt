@@ -21,7 +21,6 @@ find_package(OpenCV CONFIG REQUIRED)
 set(common_srcs
     src/common/device.cpp
     src/common/state.cpp
-    src/common/view.cpp
     src/common/blueprint.cpp
     src/common/constants.cpp
     src/common/icon_button.cpp
